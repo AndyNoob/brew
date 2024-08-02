@@ -2,6 +2,7 @@ package comfortable_andy.brew.menu.componenets;
 
 import com.google.common.base.Preconditions;
 import comfortable_andy.brew.menu.Menu;
+import comfortable_andy.brew.menu.actions.MenuAction;
 import comfortable_andy.brew.menu.componenets.tables.CollisionTable;
 import comfortable_andy.brew.menu.componenets.tables.ItemTable;
 import lombok.AccessLevel;
@@ -34,12 +35,19 @@ public abstract class Component {
      * This acts as the center of {@link Component#collisionTable} and {@link Component#itemTable}
      */
     private final @NotNull Vector2i position;
+    private final Map<MenuAction, MenuAction.ActionCriteria> actions;
 
-    private final Snapshot snapshot = new Snapshot(this::isFloating, this::getCollisionTable, this::getPosition, this::getItemTable);
+    private final Snapshot snapshot = new Snapshot(
+            this::isFloating,
+            this::getCollisionTable,
+            this::getPosition,
+            this::getItemTable,
+            () -> this.renderedBy == null ? null : this.renderedBy.getViewAnchor()
+    );
     @Getter(AccessLevel.NONE)
     private Renderer renderedBy = null;
     /**
-     * Works the same as CSS, larger z index gets rendered later (later means on top).
+     * Works the same as CSS, larger z index gets rendered on top
      */
     private int zIndex = 0;
 
@@ -84,16 +92,16 @@ public abstract class Component {
         /**
          * @return true if changed; false otherwise
          */
-        public boolean checkChangedAndCollect() {
+        public boolean collectAndCheckChanged() {
             boolean changed = false;
 
             for (Map.Entry<Supplier<Object>, Object> entry : this.states.entrySet()) {
+                final Object oldState = entry.getValue();
                 final Object newState = entry.getKey().get();
 
-                if (Objects.equals(entry.getValue(), newState)) continue;
+                entry.setValue(newState);
 
-                changed = true;
-                this.states.put(entry.getKey(), newState);
+                if (!Objects.equals(oldState, newState)) changed = true;
             }
 
             return changed;

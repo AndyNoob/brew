@@ -1,6 +1,16 @@
 package comfortable_andy.brew.menu.actions;
 
+import org.bukkit.entity.HumanEntity;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.joml.Vector2i;
+
 public interface MenuAction {
+
+    boolean tryRun(HumanEntity entity, Vector2i screenPosition);
+
+    public record ActionCriteria(@NotNull ActionType type, @Nullable ActionModifier modifier) {
+    }
 
     public enum ActionType {
         LEFT,
