@@ -1,39 +1,27 @@
 package comfortable_andy.brew.menu;
 
-import lombok.AccessLevel;
+import comfortable_andy.brew.menu.actions.MenuAction;
 import lombok.Data;
-import lombok.Getter;
+import lombok.EqualsAndHashCode;
 
-import comfortable_andy.brew.menu.componenets.MenuComponent;
 import comfortable_andy.brew.menu.componenets.Renderer;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
+import lombok.ToString;
+import lombok.Value;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.jetbrains.annotations.NotNull;
 
-@Data
-public abstract class Menu {
+@Value
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
+public class Menu extends Displaying {
 
-    private final String id;
-    @Getter(AccessLevel.NONE)
-    private final String displayName;
-    private final String description;
-    private final Renderer renderer = new Renderer();
+    Renderer renderer = new Renderer();
 
-    @NotNull
-    public Component getDisplayName() {
-        return MiniMessage.miniMessage().deserialize(displayName);
-    }
-
-    @NotNull
-    public Component getDescription() {
-        return MiniMessage.miniMessage().deserialize(this.description);
-    }
-
-    public void addComponent(@NotNull MenuComponent component) {
+    public void addComponent(@NotNull comfortable_andy.brew.menu.componenets.Component component) {
         this.renderer.insertComponent(component);
     }
 
-    public void removeComponent(@NotNull MenuComponent component) {
+    public void removeComponent(@NotNull comfortable_andy.brew.menu.componenets.Component component) {
         this.renderer.removeComponent(component);
     }
 

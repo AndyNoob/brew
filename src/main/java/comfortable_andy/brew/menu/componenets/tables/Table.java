@@ -57,6 +57,7 @@ public abstract class Table<T> implements Iterable<Table.Item<T>> {
      * @param height new height
      * @return a list of items that were trimmed off if dimension is reduced
      */
+    @SuppressWarnings("UnusedReturnValue")
     public List<Item<T>> setNewDimensions(int width, int height) {
         final List<Item<T>> trimmed = new ArrayList<>();
 

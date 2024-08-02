@@ -1,6 +1,7 @@
 package comfortable_andy.brew.menu.componenets;
 
 import com.google.common.base.Preconditions;
+import comfortable_andy.brew.menu.Menu;
 import comfortable_andy.brew.menu.componenets.tables.CollisionTable;
 import comfortable_andy.brew.menu.componenets.tables.ItemTable;
 import lombok.AccessLevel;
@@ -9,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2i;
 
 import java.util.Arrays;
@@ -22,6 +24,8 @@ import java.util.function.Supplier;
 @RequiredArgsConstructor
 public abstract class Component {
 
+    @Nullable
+    protected Menu assignedTo;
     private boolean floating = false;
     private final @NotNull CollisionTable collisionTable;
     private final @NotNull ItemTable itemTable;
@@ -50,6 +54,12 @@ public abstract class Component {
                 "The position provided is not within the collision area!"
         );
         this.itemTable.set(localPosition.x(), localPosition.y(), item);
+    }
+
+    public void assignTo(@Nullable Menu menu) {
+        if (this.assignedTo != null) this.assignedTo.removeComponent(this);
+        this.assignedTo = menu;
+        if (this.assignedTo != null) menu.addComponent(this);
     }
 
     // TODO clicked event method

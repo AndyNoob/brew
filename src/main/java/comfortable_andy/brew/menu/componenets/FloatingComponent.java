@@ -8,9 +8,9 @@ import org.joml.Vector2i;
 /**
  * For things such as page changing
  */
-public abstract class SystemComponent extends Component {
+public abstract class FloatingComponent extends Component {
 
-    public SystemComponent(@NotNull CollisionTable collisionTable, @NotNull ItemTable itemTable, @NotNull Vector2i position) {
+    public FloatingComponent(@NotNull CollisionTable collisionTable, @NotNull ItemTable itemTable, @NotNull Vector2i position) {
         super(collisionTable, itemTable, position);
         setFloating(true);
         setZIndex(-1);
