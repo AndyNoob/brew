@@ -2,21 +2,24 @@ package comfortable_andy.brew.menu;
 
 import comfortable_andy.brew.menu.actions.MenuAction;
 import comfortable_andy.brew.menu.componenets.Component;
+import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 
 import comfortable_andy.brew.menu.componenets.Renderer;
 import lombok.ToString;
-import lombok.Value;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector2i;
 
-@Value
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 public class Menu extends Displaying {
 
-    Renderer renderer = new Renderer();
+    private final Renderer renderer = new Renderer();
+
+    public Menu(String id, String displayName, String description) {
+        super(id, displayName, description);
+    }
 
     public void addComponent(@NotNull comfortable_andy.brew.menu.componenets.Component component) {
         this.renderer.insertComponent(component);
