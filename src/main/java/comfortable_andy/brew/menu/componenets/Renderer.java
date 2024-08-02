@@ -112,7 +112,7 @@ public class Renderer {
         final Vector2i finalPosition = centerIndices.add(offset);
         if (finalPosition.x < 0 || finalPosition.y < 0) return -1;
         if (finalPosition.x >= 9 || finalPosition.y >= height) return -1;
-        return -finalPosition.y() * 9 + finalPosition.x();
+        return finalPosition.y() * 9 + finalPosition.x();
     }
 
 }
