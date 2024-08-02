@@ -5,10 +5,7 @@ public interface MenuAction {
     public enum ActionType {
         LEFT,
         RIGHT,
-        MIDDLE,
-        OFF,
-        NUMBER,
-        DROP
+        MIDDLE
     }
 
     public enum ActionModifier {

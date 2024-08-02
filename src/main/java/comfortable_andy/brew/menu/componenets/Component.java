@@ -30,7 +30,8 @@ public abstract class Component {
     private final @NotNull CollisionTable collisionTable;
     private final @NotNull ItemTable itemTable;
     /**
-     * If the menu isn't moved, the center of a 5 row inventory is (0, 0), where up is +y and right is +x
+     * If the menu isn't moved, the center of a 5 row inventory is (0, 0), where up is +y and right is +x.
+     * This acts as the center of {@link Component#collisionTable} and {@link Component#itemTable}
      */
     private final @NotNull Vector2i position;
 

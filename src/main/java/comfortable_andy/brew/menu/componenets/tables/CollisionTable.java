@@ -12,13 +12,6 @@ import java.util.Objects;
 @EqualsAndHashCode(callSuper = true)
 public class CollisionTable extends Table<Boolean> {
 
-    private final Vector2i center;
-
-    public CollisionTable(@NotNull Vector2i center) {
-        super(new Boolean[0][]);
-        this.center = center;
-    }
-
     @Override
     public boolean isOutside(int x, int y) {
         return super.isOutside(x, y) || !Objects.equals(super.get(x, y), true);
