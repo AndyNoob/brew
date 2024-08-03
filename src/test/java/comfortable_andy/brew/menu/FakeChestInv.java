@@ -56,7 +56,7 @@ public class FakeChestInv implements Inventory {
 
     @Override
     public @NotNull HashMap<Integer, ItemStack> removeItemAnySlot(@NotNull ItemStack... items) throws IllegalArgumentException {
-        return null;
+        return new HashMap<>();
     }
 
     @Override
