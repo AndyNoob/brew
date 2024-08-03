@@ -14,11 +14,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2i;
 
+@Getter
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 public class Menu extends Displaying {
 
-    @Getter
     private final Renderer renderer = new Renderer();
 
     public Menu(String id, String displayName, String description) {

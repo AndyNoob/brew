@@ -2,6 +2,7 @@ package comfortable_andy.brew.menu.componenets;
 
 import comfortable_andy.brew.menu.componenets.tables.Table;
 import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -22,6 +23,7 @@ import java.util.Set;
 public class Renderer {
 
     @Getter
+    @Setter
     private @Nullable Inventory inventory;
     private final Set<Component> components = new HashSet<>();
     private final Vector2i worldSpaceAnchor = new Vector2i(0, 0);
