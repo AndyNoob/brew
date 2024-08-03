@@ -11,16 +11,16 @@ public interface MenuAction {
     boolean tryRun(HumanEntity entity, Vector2i relativePosition);
 
     @Builder
-    public record ActionCriteria(@NotNull ActionType type, @Nullable ActionModifier modifier) {
+    record ActionCriteria(@NotNull ActionType type, @Nullable ActionModifier modifier) {
     }
 
-    public enum ActionType {
+    enum ActionType {
         LEFT,
         RIGHT,
         MIDDLE
     }
 
-    public enum ActionModifier {
+    enum ActionModifier {
         SHIFT,
         DOUBLE
     }
