@@ -15,4 +15,7 @@ public class CollisionTable extends Table<Boolean> {
         return false;
     }
 
+    public void set(int x, int y) {
+        super.set(x, y, true);
+    }
 }
