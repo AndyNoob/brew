@@ -4,8 +4,6 @@ import comfortable_andy.brew.menu.actions.MenuAction;
 import comfortable_andy.brew.menu.componenets.FloatingComponent;
 import comfortable_andy.brew.menu.componenets.Renderer;
 import comfortable_andy.brew.menu.componenets.StaticComponent;
-import comfortable_andy.brew.menu.componenets.tables.CollisionTable;
-import comfortable_andy.brew.menu.componenets.tables.ItemTable;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.joml.Vector2i;

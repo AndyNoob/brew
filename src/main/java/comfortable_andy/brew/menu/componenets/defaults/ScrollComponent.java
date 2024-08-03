@@ -2,8 +2,6 @@ package comfortable_andy.brew.menu.componenets.defaults;
 
 import comfortable_andy.brew.menu.actions.MenuAction;
 import comfortable_andy.brew.menu.componenets.FloatingComponent;
-import comfortable_andy.brew.menu.componenets.tables.CollisionTable;
-import comfortable_andy.brew.menu.componenets.tables.ItemTable;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
