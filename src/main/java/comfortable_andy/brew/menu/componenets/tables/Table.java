@@ -23,7 +23,6 @@ public abstract class Table<T> implements Iterable<Table.Item<T>> {
     }
 
     public T get(@Range(from = Long.MIN_VALUE, to = Long.MAX_VALUE) int x, int y) {
-        if (isOutside(x, y)) return null;
         return this.table.getOrDefault(new Vector2i(x, y), defaultValue());
     }
 
