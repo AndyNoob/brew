@@ -91,13 +91,10 @@ public class Renderer {
 
     public boolean doesComponentContain(@NotNull Component component, @NotNull Vector2i screenPosition) {
         final Vector2i componentPosition = component.getPosition();
-        screenPosition = new Vector2i(screenPosition).add(componentPosition);
         final var collisionTable = component.getCollisionTable();
 
-        if (component.isFloating())
-            return Objects.equals(collisionTable.get(screenPosition.x(), screenPosition.y()), true);
-
-        final Vector2i clickPosition = getViewAnchor().add(screenPosition, new Vector2i());
+        final boolean shouldBeAbsolute = !component.isFloating();
+        final Vector2i clickPosition = shouldBeAbsolute ? getViewAnchor().add(screenPosition, new Vector2i()) : screenPosition;
         final Vector2i clickPosComponentSpace = new Vector2i(clickPosition)
                 .sub(componentPosition);
 
