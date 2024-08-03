@@ -1,9 +1,23 @@
 plugins {
     id 'java'
-    id 'io.papermc.paperweight.userdev' version '1.7.1'
+    id 'io.papermc.paperweight.userdev'
+    id 'xyz.jpenilla.run-paper' version '2.3.0'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
 group = 'comfortable_andy'
 version = '1.0.0'
 
+dependencies {
+    implementation rootProject.project(':menu')
+}
+
 apply from: rootProject.file('buildSrc/shared.gradle')
+
+runServer {
+    jvmArgs('-Xms1G', '-Xmx1G')
+}
+
+shadowJar {
+    archiveClassifier.set('')
+}

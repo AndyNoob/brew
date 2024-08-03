@@ -1,0 +1,3 @@
+name: brew-test
+main: comfortable_andy.brew.test_plugin.BrewTestMain
+version: -100

@@ -13,7 +13,7 @@ publishing {
     publications {
         maven(MavenPublication) {
             groupId = group
-            artifactId = rootProject.name
+            artifactId = 'brew-' + rootProject.name
             version = this.version
             from components.java
         }
