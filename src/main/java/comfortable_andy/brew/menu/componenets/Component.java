@@ -5,10 +5,7 @@ import comfortable_andy.brew.menu.Menu;
 import comfortable_andy.brew.menu.actions.MenuAction;
 import comfortable_andy.brew.menu.componenets.tables.CollisionTable;
 import comfortable_andy.brew.menu.componenets.tables.ItemTable;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -26,8 +23,6 @@ import java.util.function.Supplier;
 @ToString
 public abstract class Component {
 
-    @Nullable
-    protected Menu assignedTo;
     private boolean floating = false;
     private final @NotNull CollisionTable collisionTable;
     private final @NotNull ItemTable itemTable;
@@ -36,7 +31,7 @@ public abstract class Component {
      * This acts as the center of {@link Component#collisionTable} and {@link Component#itemTable}
      */
     private final @NotNull Vector2i position;
-    private final Map<MenuAction, MenuAction.ActionCriteria> actions;
+    private final Map<MenuAction, MenuAction.ActionCriteria> actions = new HashMap<>();
 
     private final Snapshot snapshot = new Snapshot(
             this::isFloating,
@@ -64,12 +59,6 @@ public abstract class Component {
                 "The position provided is not within the collision area!"
         );
         this.itemTable.set(localPosition.x(), localPosition.y(), item);
-    }
-
-    public void assignTo(@Nullable Menu menu) {
-        if (this.assignedTo != null) this.assignedTo.removeComponent(this);
-        this.assignedTo = menu;
-        if (this.assignedTo != null) menu.addComponent(this);
     }
 
     // TODO clicked event method
