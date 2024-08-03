@@ -23,6 +23,7 @@ import java.util.function.Supplier;
 @Getter
 @Setter
 @RequiredArgsConstructor
+@ToString
 public abstract class Component {
 
     @Nullable
