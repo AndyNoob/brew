@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class MenuTest {
 
-    private static final int CENTER_SLOT = 31;
+    public static final int CENTER_SLOT = 31;
 
     private Menu menu;
     private final FakeChestInv inv = new FakeChestInv();
