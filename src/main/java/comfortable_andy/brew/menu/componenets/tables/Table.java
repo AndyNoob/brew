@@ -2,6 +2,7 @@ package comfortable_andy.brew.menu.componenets.tables;
 
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
@@ -12,6 +13,7 @@ import java.util.*;
 
 @RequiredArgsConstructor
 @EqualsAndHashCode
+@ToString
 public abstract class Table<T> implements Iterable<Table.Item<T>> {
 
     private final Map<Vector2i, T> table = new HashMap<>();
@@ -41,11 +43,11 @@ public abstract class Table<T> implements Iterable<Table.Item<T>> {
     }
 
     public int getWidth() {
-        return this.table.keySet().stream().mapToInt(Vector2i::x).max().orElse(0);
+        return this.table.keySet().stream().mapToInt(Vector2i::x).map(v -> v == 0 ? 1 : 0).max().orElse(0);
     }
 
     public int getHeight() {
-        return this.table.keySet().stream().mapToInt(Vector2i::x).max().orElse(0);
+        return this.table.keySet().stream().mapToInt(Vector2i::x).map(v -> v == 0 ? 1 : 0).max().orElse(0);
     }
 
     public boolean isOutside(int x, int y) {
