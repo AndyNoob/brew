@@ -41,7 +41,9 @@ public class Menu extends Displaying {
     }
 
     public void removeComponent(@NotNull comfortable_andy.brew.menu.componenets.Component component) {
-        this.renderer.removeComponent(component);
+        if (this.renderer.removeComponent(component)) {
+            component.postRemoval();
+        }
     }
 
     public void updateInventoryView(InventoryView view) {

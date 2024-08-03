@@ -49,6 +49,9 @@ public abstract class Component implements Comparable<Component> {
         if (!renderer.getComponents().contains(this)) renderer.insertComponent(this);
     }
 
+    public void postRemoval() {
+    }
+
     @Override
     public int compareTo(@NotNull Component o) {
         return Integer.compare(zIndex, o.zIndex);

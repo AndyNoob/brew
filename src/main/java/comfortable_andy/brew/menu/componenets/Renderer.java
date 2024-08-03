@@ -31,9 +31,9 @@ public class Renderer {
         component.setRenderer(this);
     }
 
-    public void removeComponent(@NotNull final Component component) {
+    public boolean removeComponent(@NotNull final Component component) {
         component.setRenderedBy(null);
-        this.components.remove(component);
+        return this.components.remove(component);
     }
 
     public List<Component> getComponents() {
