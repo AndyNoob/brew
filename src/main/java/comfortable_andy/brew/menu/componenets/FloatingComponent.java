@@ -12,8 +12,8 @@ import org.joml.Vector2i;
 @ToString(callSuper = true)
 public abstract class FloatingComponent extends Component {
 
-    public FloatingComponent(@NotNull CollisionTable collisionTable, @NotNull ItemTable itemTable, @NotNull Vector2i position) {
-        super(collisionTable, itemTable, position);
+    public FloatingComponent(@NotNull Vector2i position) {
+        super(new CollisionTable(), new ItemTable(), position);
         setFloating(true);
         setZIndex(-1);
     }

@@ -68,7 +68,7 @@ public class MenuTest {
     public static class ScrollingComponent extends FloatingComponent {
 
         public ScrollingComponent(Vector2i pos) {
-            super(new CollisionTable(), new ItemTable(), pos);
+            super(pos);
             getCollisionTable().set(0, 0, true);
             getActions().put((e, p) -> {throw new RuntimeException("yes");}, new MenuAction.ActionCriteria(MenuAction.ActionType.LEFT, null));
         }
@@ -78,7 +78,7 @@ public class MenuTest {
     public static class ButtonComponent extends StaticComponent {
 
         public ButtonComponent(Vector2i pos) {
-            super(new CollisionTable(), new ItemTable(), pos);
+            super(pos);
             getCollisionTable().set(0, 0, true);
             getItemTable().set(0, 0, new ItemStack(Material.DIAMOND));
             getActions().put((e, p) -> {throw new RuntimeException("yes");}, new MenuAction.ActionCriteria(MenuAction.ActionType.LEFT, null));

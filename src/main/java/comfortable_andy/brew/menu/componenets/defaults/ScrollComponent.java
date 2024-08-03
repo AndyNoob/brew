@@ -26,7 +26,7 @@ public class ScrollComponent extends FloatingComponent {
 
     @Builder
     public ScrollComponent(Vector2i pos, boolean simulatePagination, boolean isHorizontal, int moveAmount, ItemStack back, ItemStack forward, IntegerRange range, BiConsumer<@Nullable Integer, @Nullable Integer> callback) {
-        super(new CollisionTable(), new ItemTable(), pos);
+        super(pos);
         if (simulatePagination) page = range.getMinimum();
         else page = null;
         setZIndex(1);

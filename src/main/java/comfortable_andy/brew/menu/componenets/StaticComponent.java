@@ -9,8 +9,8 @@ import org.joml.Vector2i;
 @ToString(callSuper = true)
 public abstract class StaticComponent extends Component {
 
-    public StaticComponent(@NotNull CollisionTable collisionTable, @NotNull ItemTable itemTable, @NotNull Vector2i position) {
-        super(collisionTable, itemTable, position);
+    public StaticComponent(@NotNull Vector2i position) {
+        super(new CollisionTable(), new ItemTable(), position);
     }
 
 }
