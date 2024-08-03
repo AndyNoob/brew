@@ -49,8 +49,6 @@ public abstract class Component {
         if (!renderer.getComponents().contains(this)) renderer.insertComponent(this);
     }
 
-    // TODO clicked event method
-
     public static class Snapshot {
 
         @SafeVarargs
