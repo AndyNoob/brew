@@ -12,13 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 import org.joml.Vector2i;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 public class Renderer {
 
@@ -84,14 +78,24 @@ public class Renderer {
      * @param screenPosition the xy screen position to check
      * @return a list of components that contain the position, with larger z index appearing earlier in the list
      */
-    public List<Component> componentsAt(@NotNull Vector2i screenPosition) {
+    public Map<Component, Vector2i> componentsAt(@NotNull Vector2i screenPosition) {
         return this.components.stream()
-                .filter(component -> doesComponentContain(component, screenPosition))
-                .sorted(Comparator.comparing(Component::getZIndex).reversed())
-                .toList();
+                .sorted(Comparator.reverseOrder())
+                .reduce(new LinkedHashMap<>(), (map, component) -> {
+                    Vector2i relative = clickedRelativePosition(component, screenPosition);
+                    if (relative != null) map.put(component, relative);
+                    return map;
+                }, (a, b) -> {
+                    a.putAll(b);
+                    return a;
+                });
     }
 
-    public boolean doesComponentContain(@NotNull Component component, @NotNull Vector2i screenPosition) {
+    /**
+     * @return relative clicked position from the component
+     */
+     @Nullable
+    public Vector2i clickedRelativePosition(@NotNull Component component, @NotNull Vector2i screenPosition) {
         final Vector2i componentPosition = component.getPosition();
         final var collisionTable = component.getCollisionTable();
 
@@ -100,7 +104,7 @@ public class Renderer {
         final Vector2i clickPosComponentSpace = new Vector2i(clickPosition)
                 .sub(componentPosition);
 
-        return Objects.equals(collisionTable.get(clickPosComponentSpace.x, clickPosComponentSpace.y), true);
+        return Objects.equals(collisionTable.get(clickPosComponentSpace.x, clickPosComponentSpace.y), true) ? clickPosComponentSpace : null;
     }
 
     @Range(from = -1, to = 53)
