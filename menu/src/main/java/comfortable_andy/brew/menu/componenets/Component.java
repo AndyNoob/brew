@@ -37,7 +37,7 @@ public abstract class Component implements Comparable<Component> {
             () -> this.renderedBy == null ? null : this.renderedBy.getViewAnchor()
     );
     @Getter(AccessLevel.PROTECTED)
-    @Setter(AccessLevel.NONE)
+    @Setter(AccessLevel.PACKAGE)
     private Renderer renderedBy = null;
     /**
      * Works the same as CSS, larger z index gets rendered on top
