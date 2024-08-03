@@ -1,1 +1,2 @@
 rootProject.name = 'brew'
+include(':menu', ':testPlugin')
