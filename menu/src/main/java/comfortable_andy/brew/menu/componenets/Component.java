@@ -31,9 +31,9 @@ public abstract class Component implements Comparable<Component> {
 
     private final Snapshot snapshot = new Snapshot(
             this::isFloating,
-            this::getCollisionTable,
-            this::getPosition,
-            this::getItemTable,
+            () -> getCollisionTable().clone(),
+            () -> new Vector2i(getPosition()),
+            () -> getItemTable().clone(),
             () -> this.renderedBy == null ? null : this.renderedBy.getViewAnchor()
     );
     @Getter(AccessLevel.PROTECTED)
