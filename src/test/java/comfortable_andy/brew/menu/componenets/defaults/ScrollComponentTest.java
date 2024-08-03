@@ -1,8 +1,7 @@
 package comfortable_andy.brew.menu.componenets.defaults;
 
-import comfortable_andy.brew.menu.FakeChestInv;
-import comfortable_andy.brew.menu.Menu;
 import comfortable_andy.brew.menu.MenuTest;
+import comfortable_andy.brew.menu.TestWithMenu;
 import comfortable_andy.brew.menu.actions.MenuAction;
 import comfortable_andy.brew.menu.componenets.Renderer;
 import org.apache.commons.lang3.IntegerRange;
@@ -13,14 +12,12 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ScrollComponentTest {
+public class ScrollComponentTest extends TestWithMenu {
 
     @Test
     public void testScroll() {
-        final Menu menu = new Menu("bruh", "bruh", "bru??????");
         Renderer renderer = menu.getRenderer();
-        FakeChestInv inventory = new FakeChestInv();
-        renderer.setInventory(inventory);
+        renderer.setInventory(inv);
         ScrollComponent component = ScrollComponent.builder()
                 .pos(new Vector2i(4, 0))
                 .simulatePagination(true)
@@ -36,7 +33,7 @@ public class ScrollComponentTest {
                 .back(new ItemStack(Material.DIAMOND))
                 .build();
         menu.addComponent(component);
-        assertThrows(IllegalStateException.class, () -> menu.handleClick(inventory, MenuAction.ActionType.LEFT, null, MenuTest.CENTER_SLOT + 4 - 9, null));
+        assertThrows(IllegalStateException.class, () -> menu.handleClick(inv, MenuAction.ActionType.LEFT, null, MenuTest.CENTER_SLOT + 4 - 9, null));
         assertEquals(new Vector2i(0, 10), renderer.getViewAnchor());
     }
 

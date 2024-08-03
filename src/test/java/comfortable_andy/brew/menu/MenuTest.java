@@ -7,24 +7,15 @@ import comfortable_andy.brew.menu.componenets.StaticComponent;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.joml.Vector2i;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class MenuTest {
+public class MenuTest extends TestWithMenu {
 
     public static final int CENTER_SLOT = 31;
-
-    private Menu menu;
-    private final FakeChestInv inv = new FakeChestInv();
-
-    @BeforeEach
-    public void initMenu() {
-        menu = new Menu("thing", "yo", "to");
-    }
 
     @Test
     public void testOriginFloatingClick() {
