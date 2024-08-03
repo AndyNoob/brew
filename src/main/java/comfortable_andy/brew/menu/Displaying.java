@@ -13,7 +13,8 @@ public abstract class Displaying {
 
     protected final String id;
     @Getter(AccessLevel.NONE)
-    protected final String displayName;
+    @Setter
+    protected @NonNull String displayName;
     protected final String description;
 
     @NotNull
