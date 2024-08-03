@@ -2,19 +2,23 @@ package comfortable_andy.brew.menu;
 
 import comfortable_andy.brew.menu.actions.MenuAction;
 import comfortable_andy.brew.menu.componenets.Component;
-import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 
 import comfortable_andy.brew.menu.componenets.Renderer;
+import lombok.Getter;
 import lombok.ToString;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2i;
 
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 public class Menu extends Displaying {
 
+    @Getter
     private final Renderer renderer = new Renderer();
 
     public Menu(String id, String displayName, String description) {
@@ -52,20 +56,25 @@ public class Menu extends Displaying {
             default -> null;
         };
         if (type == null) return;
-        final MenuAction.ActionCriteria criteria = new MenuAction.ActionCriteria(type, modifier);
-        final Vector2i screenPosition = this.renderer
-                .translateToVec(this.renderer.getInventory(), event.getSlot());
-        boolean cancel = false;
-        for (Component component : this.renderer.componentsAt(screenPosition)) {
-            for (var entry : component.getActions().entrySet()) {
-                if (entry.getValue().equals(criteria))
-                    cancel = cancel || entry.getKey().tryRun(event.getWhoClicked(), screenPosition);
-            }
-        }
+        boolean cancel = handleClick(event.getClickedInventory(), type, modifier, event.getSlot(), event.getWhoClicked());
         if (cancel) {
             event.setCancelled(true);
             this.renderer.tryRender(false);
         }
+    }
+
+    public boolean handleClick(Inventory inventory, MenuAction.ActionType type, @Nullable MenuAction.ActionModifier modifier, int slot, HumanEntity whoClicked) {
+        final MenuAction.ActionCriteria criteria = new MenuAction.ActionCriteria(type, modifier);
+        final Vector2i screenPosition = this.renderer
+                .translateToVec(inventory, slot);
+        boolean cancel = false;
+        for (Component component : this.renderer.componentsAt(screenPosition)) {
+            for (var entry : component.getActions().entrySet()) {
+                if (entry.getValue().equals(criteria))
+                    cancel = cancel || entry.getKey().tryRun(whoClicked, screenPosition);
+            }
+        }
+        return cancel;
     }
 
 }
