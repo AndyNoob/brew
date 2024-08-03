@@ -16,6 +16,9 @@ import java.util.List;
 import java.util.ListIterator;
 
 public class FakeChestInv implements Inventory {
+
+    private final ItemStack[] items = new ItemStack[54];
+
     @Override
     public int getSize() {
         return 54;
@@ -33,12 +36,12 @@ public class FakeChestInv implements Inventory {
 
     @Override
     public @Nullable ItemStack getItem(int index) {
-        return null;
+        return items[index];
     }
 
     @Override
     public void setItem(int index, @Nullable ItemStack item) {
-
+        items[index] = item;
     }
 
     @Override
@@ -63,7 +66,6 @@ public class FakeChestInv implements Inventory {
 
     @Override
     public void setContents(@Nullable ItemStack @NotNull [] items) throws IllegalArgumentException {
-
     }
 
     @Override
