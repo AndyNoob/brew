@@ -17,7 +17,7 @@ import java.util.function.Supplier;
 @Setter
 @RequiredArgsConstructor
 @ToString
-public abstract class Component {
+public abstract class Component implements Comparable<Component> {
 
     private boolean floating = false;
     private final @NotNull CollisionTable collisionTable;
@@ -36,7 +36,7 @@ public abstract class Component {
             this::getItemTable,
             () -> this.renderedBy == null ? null : this.renderedBy.getViewAnchor()
     );
-    @Getter(AccessLevel.NONE)
+    @Getter(AccessLevel.PROTECTED)
     private Renderer renderedBy = null;
     /**
      * Works the same as CSS, larger z index gets rendered on top
@@ -47,6 +47,11 @@ public abstract class Component {
         if (this.renderedBy != null) this.renderedBy.removeComponent(this);
         this.renderedBy = renderer;
         if (!renderer.getComponents().contains(this)) renderer.insertComponent(this);
+    }
+
+    @Override
+    public int compareTo(@NotNull Component o) {
+        return Integer.compare(zIndex, o.zIndex);
     }
 
     public static class Snapshot {
