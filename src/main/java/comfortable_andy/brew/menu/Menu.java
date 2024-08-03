@@ -7,13 +7,24 @@ import lombok.EqualsAndHashCode;
 import comfortable_andy.brew.menu.componenets.Renderer;
 import lombok.Getter;
 import lombok.ToString;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2i;
 
+import java.util.Map;
+
+/**
+ * @see Menu#getRenderer()
+ * @see Renderer#render()
+ * @see Renderer#tryRender(boolean)
+ * @see Menu#updateInventoryView(InventoryView)
+ * @see Menu#handleClick(InventoryClickEvent)
+ */
 @Getter
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
@@ -31,6 +42,11 @@ public class Menu extends Displaying {
 
     public void removeComponent(@NotNull comfortable_andy.brew.menu.componenets.Component component) {
         this.renderer.removeComponent(component);
+    }
+
+    public void updateInventoryView(InventoryView view) {
+        String title = LegacyComponentSerializer.legacySection().serialize(getDisplayName());
+        view.setTitle(title);
     }
 
     public void handleClick(InventoryClickEvent event) {
@@ -68,10 +84,11 @@ public class Menu extends Displaying {
         final Vector2i screenPosition = this.renderer
                 .translateToVec(inventory, slot);
         boolean cancel = false;
-        for (Component component : this.renderer.componentsAt(screenPosition)) {
-            for (var entry : component.getActions().entrySet()) {
-                if (entry.getValue().equals(criteria))
-                    cancel = cancel || entry.getKey().tryRun(whoClicked, screenPosition);
+        for (Map.Entry<Component, Vector2i> e : this.renderer.componentsAt(screenPosition).entrySet()) {
+            Component component = e.getKey();
+            for (var actionEntry : component.getActions().entrySet()) {
+                if (actionEntry.getValue().equals(criteria))
+                    cancel = cancel || actionEntry.getKey().tryRun(whoClicked, e.getValue());
             }
         }
         return cancel;
