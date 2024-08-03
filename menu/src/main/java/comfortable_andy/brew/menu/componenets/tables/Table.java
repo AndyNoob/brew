@@ -4,6 +4,7 @@ import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import org.apache.commons.lang3.IntegerRange;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
@@ -15,7 +16,7 @@ import java.util.stream.IntStream;
 @RequiredArgsConstructor
 @EqualsAndHashCode
 @ToString
-public abstract class Table<T> implements Iterable<Table.Item<T>> {
+public abstract class Table<T> implements Iterable<Table.Item<T>>, Cloneable {
 
     private final Map<Vector2i, T> table = new HashMap<>();
 
@@ -23,6 +24,9 @@ public abstract class Table<T> implements Iterable<Table.Item<T>> {
     protected T defaultValue() {
         return null;
     }
+
+    @Contract("!null -> !null; null -> null")
+    protected abstract T clone(T t);
 
     public T get(@Range(from = Long.MIN_VALUE, to = Long.MAX_VALUE) int x, int y) {
         return this.table.getOrDefault(new Vector2i(x, y), defaultValue());
@@ -63,6 +67,18 @@ public abstract class Table<T> implements Iterable<Table.Item<T>> {
 
     public boolean isEmpty() {
         return this.table.isEmpty();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Table<T> clone() {
+        try {
+            final Table<T> clone = (Table<T>) super.clone();
+            clone.table.replaceAll((v, t) -> clone(t));
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
     }
 
     public record Item<T>(int x, int y, @Nullable T value) {

@@ -15,6 +15,11 @@ public class CollisionTable extends Table<Boolean> {
         return false;
     }
 
+    @Override
+    protected Boolean clone(Boolean bool) {
+        return bool;
+    }
+
     public void set(int x, int y) {
         super.set(x, y, true);
     }

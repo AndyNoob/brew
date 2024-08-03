@@ -12,4 +12,9 @@ public class ItemTable extends Table<ItemStack> {
     protected @Nullable ItemStack defaultValue() {
         return new ItemStack(Material.AIR);
     }
+
+    @Override
+    protected ItemStack clone(ItemStack stack) {
+        return stack == null ? null : stack.clone();
+    }
 }
