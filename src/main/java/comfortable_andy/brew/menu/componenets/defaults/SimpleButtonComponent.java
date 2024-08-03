@@ -2,6 +2,7 @@ package comfortable_andy.brew.menu.componenets.defaults;
 
 import comfortable_andy.brew.menu.actions.MenuAction;
 import comfortable_andy.brew.menu.componenets.StaticComponent;
+import org.apache.commons.lang3.IntegerRange;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.ItemStack;
 import org.joml.Vector2i;
@@ -14,12 +15,10 @@ public class SimpleButtonComponent extends StaticComponent {
         super(pos);
         final int halfWidth = width / 2;
         final int halfHeight = height / 2;
-        for (int w = 0; w < width; w++) {
-            for (int h = 0; h < height; h++) {
-                getCollisionTable().set(w - halfWidth, h - halfHeight);
-                getItemTable().set(w - halfWidth, h - halfHeight, item.clone());
-            }
-        }
+        final IntegerRange xRange = IntegerRange.of(-halfWidth, halfWidth);
+        final IntegerRange yRange = IntegerRange.of(-halfHeight, halfHeight);
+        getCollisionTable().set(xRange, yRange, true);
+        getItemTable().set(xRange, yRange, item.clone());
         getActions().put((h, rel) -> {
             callback.accept(h);
             return true;

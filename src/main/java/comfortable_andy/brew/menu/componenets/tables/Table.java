@@ -3,12 +3,14 @@ package comfortable_andy.brew.menu.componenets.tables;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
+import org.apache.commons.lang3.IntegerRange;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 import org.joml.Vector2i;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
 @RequiredArgsConstructor
 @EqualsAndHashCode
@@ -32,6 +34,13 @@ public abstract class Table<T> implements Iterable<Table.Item<T>> {
     @Nullable
     public T set(int x, int y, @Nullable T value) {
         return this.table.put(new Vector2i(x, y), value);
+    }
+
+    public void set(IntegerRange xRange, IntegerRange yRange, @Nullable T value) {
+        IntStream.range(xRange.getMinimum(), xRange.getMaximum() + 1).forEachOrdered(x -> {
+            IntStream.range(yRange.getMinimum(), yRange.getMaximum() + 1)
+                    .forEachOrdered(y -> set(x, y, value));
+        });
     }
 
     @NotNull
