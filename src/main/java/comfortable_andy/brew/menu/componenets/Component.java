@@ -1,14 +1,10 @@
 package comfortable_andy.brew.menu.componenets;
 
-import com.google.common.base.Preconditions;
-import comfortable_andy.brew.menu.Menu;
 import comfortable_andy.brew.menu.actions.MenuAction;
 import comfortable_andy.brew.menu.componenets.tables.CollisionTable;
 import comfortable_andy.brew.menu.componenets.tables.ItemTable;
 import lombok.*;
-import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2i;
 
 import java.util.Arrays;
@@ -51,14 +47,6 @@ public abstract class Component {
         if (this.renderedBy != null) this.renderedBy.removeComponent(this);
         this.renderedBy = renderer;
         if (!renderer.getComponents().contains(this)) renderer.insertComponent(this);
-    }
-
-    public void putItem(@NotNull Vector2i localPosition, @NotNull ItemStack item) {
-        Preconditions.checkArgument(
-                !collisionTable.isOutside(localPosition.x(), localPosition.y()),
-                "The position provided is not within the collision area!"
-        );
-        this.itemTable.set(localPosition.x(), localPosition.y(), item);
     }
 
     // TODO clicked event method
