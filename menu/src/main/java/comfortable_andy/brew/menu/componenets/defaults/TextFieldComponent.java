@@ -34,49 +34,52 @@ public abstract class TextFieldComponent extends StaticComponent {
     private final RegisteredListener onClick;
     private final RegisteredListener onClose;
 
-    @SuppressWarnings("deprecation")
     public TextFieldComponent(@NotNull JavaPlugin plugin, @NotNull Vector2i position) {
         super(position);
         final AtomicReference<ItemStack> resultReference = new AtomicReference<>(null);
-        this.onPrepare = makeListener(plugin, (l, e) -> {
-            PrepareAnvilEvent event = (PrepareAnvilEvent) e;
-            if (event.getInventory() != this.openAnvils.get(event.getView().getPlayer()))
-                return;
-            resultReference.set(event.getResult());
-            event.getView().setProperty(InventoryView.Property.REPAIR_COST, 0);
-        });
-        this.onClick = makeListener(plugin, (l, e) -> {
-            InventoryClickEvent event = (InventoryClickEvent) e;
-            Inventory inventory = event.getClickedInventory();
-            if (inventory == null) return;
-            if (inventory != this.openAnvils.get(event.getWhoClicked())) return;
-            event.setCancelled(true);
-            if (event.getSlot() == 2) {
-                ItemStack result = resultReference.get();
-                String str = null;
-                if (result != null && result.hasItemMeta())
-                    str = result.getItemMeta().getDisplayName();
-                onEnterText(
-                        event.getWhoClicked(),
-                        Objects.requireNonNullElse(str, "")
-                );
-                reopenOriginal(event.getWhoClicked());
-                this.dontReopen.put(event.getWhoClicked(), inventory);
-            }
-        });
-        this.onClose = makeListener(plugin, (l, e) -> {
-            InventoryCloseEvent event = (InventoryCloseEvent) e;
-            Inventory inventory = event.getView().getTopInventory();
-            if (inventory != this.openAnvils.remove(event.getPlayer())) return;
-            resultReference.set(null);
-            Player player = (Player) event.getPlayer();
-            player.giveExpLevels(0);
-            if (this.dontReopen.remove(event.getPlayer()) == inventory) return;
-            reopenOriginal(event.getPlayer());
-        });
+        this.onPrepare = makeListener(plugin, (l, e) -> handleRenaming((PrepareAnvilEvent) e, resultReference));
+        this.onClick = makeListener(plugin, (l, e) -> handleFinish((InventoryClickEvent) e, resultReference));
+        this.onClose = makeListener(plugin, (l, e) -> handleClose((InventoryCloseEvent) e, resultReference));
         PrepareAnvilEvent.getHandlerList().register(this.onPrepare);
         InventoryClickEvent.getHandlerList().register(this.onClick);
         InventoryCloseEvent.getHandlerList().register(this.onClose);
+    }
+
+    private void handleRenaming(PrepareAnvilEvent e, AtomicReference<ItemStack> resultReference) {
+        if (e.getInventory() != this.openAnvils.get(e.getView().getPlayer()))
+            return;
+        resultReference.set(e.getResult());
+        e.getView().setProperty(InventoryView.Property.REPAIR_COST, 0);
+    }
+
+    @SuppressWarnings("deprecation")
+    private void handleFinish(InventoryClickEvent e, AtomicReference<ItemStack> resultReference) {
+        Inventory inventory = e.getClickedInventory();
+        if (inventory == null) return;
+        if (inventory != this.openAnvils.get(e.getWhoClicked())) return;
+        e.setCancelled(true);
+        if (e.getSlot() == 2) {
+            ItemStack result = resultReference.get();
+            String str = null;
+            if (result != null && result.hasItemMeta())
+                str = result.getItemMeta().getDisplayName();
+            onEnterText(
+                    e.getWhoClicked(),
+                    Objects.requireNonNullElse(str, "")
+            );
+            reopenOriginal(e.getWhoClicked());
+            this.dontReopen.put(e.getWhoClicked(), inventory);
+        }
+    }
+
+    private void handleClose(InventoryCloseEvent e, AtomicReference<ItemStack> resultReference) {
+        Inventory inventory = e.getView().getTopInventory();
+        if (inventory != this.openAnvils.remove(e.getPlayer())) return;
+        resultReference.set(null);
+        Player player = (Player) e.getPlayer();
+        player.giveExpLevels(0);
+        if (this.dontReopen.remove(e.getPlayer()) == inventory) return;
+        reopenOriginal(e.getPlayer());
     }
 
     public Inventory open(HumanEntity entity) {
