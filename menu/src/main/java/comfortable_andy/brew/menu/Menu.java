@@ -54,7 +54,7 @@ public class Menu extends Displaying {
     public void handleClick(InventoryClickEvent event) {
         if (this.renderer.getInventory() == null) return;
         if (event.getClickedInventory() != this.renderer.getInventory()) return;
-        MenuAction.ActionModifier modifier = null;
+        MenuAction.ActionModifier modifier = MenuAction.ActionModifier.NONE;
         final MenuAction.ActionType type = switch (event.getClick()) {
             case DROP, LEFT, SWAP_OFFHAND, NUMBER_KEY -> MenuAction.ActionType.LEFT;
             case DOUBLE_CLICK -> {
