@@ -85,15 +85,18 @@ public class Menu extends Displaying {
         final MenuAction.ActionCriteria criteria = new MenuAction.ActionCriteria(type, modifier);
         final Vector2i screenPosition = this.renderer
                 .translateToVec(inventory, slot);
+        boolean ran = false;
         boolean cancel = false;
         for (Map.Entry<Component, Vector2i> e : this.renderer.componentsAt(screenPosition).entrySet()) {
             Component component = e.getKey();
             for (var actionEntry : component.getActions().entrySet()) {
-                if (actionEntry.getValue().equals(criteria))
+                if (actionEntry.getValue().equals(criteria)) {
                     cancel = cancel || actionEntry.getKey().tryRun(whoClicked, e.getValue());
+                    ran = true;
+                }
             }
         }
-        return cancel;
+        return !ran || cancel;
     }
 
 }
