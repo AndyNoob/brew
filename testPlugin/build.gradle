@@ -8,7 +8,15 @@ plugins {
 group = 'comfortable_andy'
 version = '1.0.0'
 
+repositories {
+    maven {
+        name = 'dmulloy2-repo'
+        url = 'https://repo.dmulloy2.net/repository/public/'
+    }
+}
+
 dependencies {
+    compileOnly 'com.comphenix.protocol:ProtocolLib:5.1.0'
     implementation rootProject.project(':menu')
 }
 
@@ -16,6 +24,9 @@ apply from: rootProject.file('buildSrc/shared.gradle')
 
 runServer {
     jvmArgs('-Xms1G', '-Xmx1G')
+    downloadPlugins {
+        url 'https://ci.dmulloy2.net/job/ProtocolLib/lastSuccessfulBuild/artifact/build/libs/ProtocolLib.jar'
+    }
 }
 
 shadowJar {

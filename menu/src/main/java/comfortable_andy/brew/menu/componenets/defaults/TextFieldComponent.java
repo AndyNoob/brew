@@ -29,6 +29,7 @@ public abstract class TextFieldComponent extends StaticComponent {
 
     protected final Map<HumanEntity, Inventory> openAnvils = new HashMap<>();
     protected final Map<HumanEntity, Inventory> dontReopen = new HashMap<>();
+    protected final JavaPlugin plugin;
     private boolean isRemoved = false;
     private final RegisteredListener onPrepare;
     private final RegisteredListener onClick;
@@ -36,6 +37,7 @@ public abstract class TextFieldComponent extends StaticComponent {
 
     public TextFieldComponent(@NotNull JavaPlugin plugin, @NotNull Vector2i position) {
         super(position);
+        this.plugin = plugin;
         final AtomicReference<ItemStack> resultReference = new AtomicReference<>(null);
         this.onPrepare = makeListener(plugin, (l, e) -> handleRenaming((PrepareAnvilEvent) e, resultReference));
         this.onClick = makeListener(plugin, (l, e) -> handleFinish((InventoryClickEvent) e, resultReference));

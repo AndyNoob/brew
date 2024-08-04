@@ -22,13 +22,11 @@ public class SimpleTextFieldComponent extends TextFieldComponent {
 
     @Setter
     private ItemStack item;
-    private final JavaPlugin plugin;
     private final BiConsumer<HumanEntity, String> callback;
     private final Map<HumanEntity, Inventory> reopens = new HashMap<>();
 
     public SimpleTextFieldComponent(@NotNull JavaPlugin plugin, @NotNull Vector2i position, ItemStack item, BiConsumer<HumanEntity, String> callback) {
         super(plugin, position);
-        this.plugin = plugin;
         this.callback = callback;
         this.item = item;
         getCollisionTable().set(0, 0);
@@ -51,7 +49,8 @@ public class SimpleTextFieldComponent extends TextFieldComponent {
     protected void reopenOriginal(HumanEntity entity) {
         Inventory inventory = reopens.remove(entity);
         if (inventory != null) {
-            Bukkit.getScheduler().runTaskLater(plugin, () -> entity.openInventory(inventory), 1);
+            entity.openInventory(inventory);
+            Bukkit.getScheduler().runTaskLater(plugin, () -> entity.openInventory(inventory), 0);
         }
     }
 }

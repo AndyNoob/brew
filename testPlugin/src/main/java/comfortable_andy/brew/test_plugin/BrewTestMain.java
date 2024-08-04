@@ -1,6 +1,11 @@
 package comfortable_andy.brew.test_plugin;
 
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.ProtocolManager;
+import com.comphenix.protocol.events.PacketAdapter;
+import com.comphenix.protocol.events.PacketEvent;
 import com.mojang.brigadier.Command;
+import com.comphenix.protocol.ProtocolLibrary;
 import comfortable_andy.brew.menu.Menu;
 import comfortable_andy.brew.menu.componenets.Renderer;
 import comfortable_andy.brew.test_plugin.components.SimpleTextFieldComponent;
@@ -34,6 +39,10 @@ public class BrewTestMain extends JavaPlugin implements Listener {
     public void onEnable() {
         getServer().getPluginManager().registerEvents(this, this);
         registerCommands();
+        if (getServer().getPluginManager().isPluginEnabled("ProtocolLib")) {
+            registerProtocolLib();
+            getLogger().info("Packet listener enabled.");
+        } else getLogger().info("Packet listener not enabled.");
     }
 
     @SuppressWarnings("UnstableApiUsage")
@@ -68,6 +77,15 @@ public class BrewTestMain extends JavaPlugin implements Listener {
                             })
             );
             commands.register(root.build());
+        });
+    }
+
+    private void registerProtocolLib() {
+        ProtocolManager manager = ProtocolLibrary.getProtocolManager();
+        manager.addPacketListener(new PacketAdapter(this, PacketType.Play.Client.WINDOW_CLICK) {
+            @Override
+            public void onPacketReceiving(PacketEvent event) {
+            }
         });
     }
 
