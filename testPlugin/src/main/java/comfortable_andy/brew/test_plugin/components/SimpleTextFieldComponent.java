@@ -4,9 +4,6 @@ import comfortable_andy.brew.menu.actions.MenuAction;
 import comfortable_andy.brew.menu.componenets.defaults.TextFieldComponent;
 import lombok.Getter;
 import lombok.Setter;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.Style;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
@@ -25,28 +22,36 @@ public class SimpleTextFieldComponent extends TextFieldComponent {
 
     @Setter
     private ItemStack item;
+    private final JavaPlugin plugin;
+    private final BiConsumer<HumanEntity, String> callback;
+    private final Map<HumanEntity, Inventory> reopens = new HashMap<>();
 
-    public SimpleTextFieldComponent(@NotNull JavaPlugin plugin, @NotNull Vector2i position, ItemStack item, BiConsumer<HumanEntity, String> consumer) {
-        this(plugin, position, item, consumer, new HashMap<>());
-    }
-
-    public SimpleTextFieldComponent(@NotNull JavaPlugin plugin, @NotNull Vector2i position, ItemStack item, BiConsumer<HumanEntity, String> consumer, Map<HumanEntity, Inventory> reopens) {
-        super(plugin, position, (h, str) -> {
-            h.closeInventory(); // the onExit will handle reopens
-            Bukkit.getScheduler().runTaskLater(plugin, () -> consumer.accept(h, str), 1);
-        }, h -> Bukkit.getScheduler().runTaskLater(plugin, () -> {
-            Inventory inventory = reopens.get(h);
-            if (inventory != null) h.openInventory(inventory);
-        }, 1));
-        getCollisionTable().set(0, 0);
+    public SimpleTextFieldComponent(@NotNull JavaPlugin plugin, @NotNull Vector2i position, ItemStack item, BiConsumer<HumanEntity, String> callback) {
+        super(plugin, position);
+        this.plugin = plugin;
+        this.callback = callback;
         this.item = item;
+        getCollisionTable().set(0, 0);
         getItemTable().set(0, 0, item);
         getActions().put((h, rel) -> {
             Inventory cur = h.getOpenInventory().getTopInventory();
             reopens.put(h, cur);
-            h.openInventory(super.anvil);
+            Inventory anvil = open(h);
+            anvil.setItem(0, new ItemStack(Material.PAPER));
             return true;
         }, MenuAction.ActionCriteria.builder().type(MenuAction.ActionType.LEFT).build());
     }
 
+    @Override
+    protected void onEnterText(HumanEntity entity, String str) {
+        Bukkit.getScheduler().runTaskLater(plugin, () -> callback.accept(entity, str), 1);
+    }
+
+    @Override
+    protected void reopenOriginal(HumanEntity entity) {
+        Inventory inventory = reopens.remove(entity);
+        if (inventory != null) {
+            Bukkit.getScheduler().runTaskLater(plugin, () -> entity.openInventory(inventory), 1);
+        }
+    }
 }

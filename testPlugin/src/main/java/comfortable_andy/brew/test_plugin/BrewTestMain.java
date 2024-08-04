@@ -47,15 +47,18 @@ public class BrewTestMain extends JavaPlugin implements Listener {
                                 final CommandSourceStack source = s.getSource();
                                 final CommandSender sender = source.getExecutor() == null ? source.getSender() : source.getExecutor();
                                 if (!(sender instanceof HumanEntity entity)) return 0;
-                                Menu menu = menus.computeIfAbsent(entity, k -> new Menu("yo", entity.getName(), "bruhhhh"));
+                                Menu menu = menus.computeIfAbsent(entity, k -> {
+                                    Menu m = new Menu("yo", entity.getName(), "bruhhhh");
+                                    final ItemStack item = new ItemStack(Material.PAPER);
+                                    item.editMeta(meta -> meta.displayName(Component.text("<not set>", Style.style(TextDecoration.ITALIC))));
+                                    m.addComponent(new SimpleTextFieldComponent(this, new Vector2i(), item, (e, str) -> {
+                                        m.setDisplayName(str);
+                                        item.editMeta(meta -> meta.displayName(Component.text(str)));
+                                        m.updateInventoryView(e.getOpenInventory());
+                                    }));
+                                    return m;
+                                });
                                 Renderer renderer = menu.getRenderer();
-                                final ItemStack item = new ItemStack(Material.PAPER);
-                                item.editMeta(meta -> meta.displayName(Component.text("<not set>", Style.style(TextDecoration.ITALIC))));
-                                menu.addComponent(new SimpleTextFieldComponent(this, new Vector2i(), item, (e, str) -> {
-                                    menu.setDisplayName(str);
-                                    item.editMeta(meta -> meta.displayName(Component.text(str)));
-                                    menu.updateInventoryView(e.getOpenInventory());
-                                }));
                                 Inventory inventory = renderer.getInventory() == null ? Bukkit.createInventory(null, 54) : renderer.getInventory();
                                 renderer.setInventory(inventory);
                                 entity.openInventory(inventory);
@@ -72,4 +75,5 @@ public class BrewTestMain extends JavaPlugin implements Listener {
         Menu menu = menus.get(event.getWhoClicked());
         if (menu != null) menu.handleClick(event);
     }
+
 }
