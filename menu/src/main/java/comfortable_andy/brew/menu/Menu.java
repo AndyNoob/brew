@@ -10,12 +10,15 @@ import lombok.ToString;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2i;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -79,6 +82,24 @@ public class Menu extends Displaying {
             event.setCancelled(true);
             this.renderer.tryRender(false);
         }
+    }
+
+    public void handleClick(InventoryDragEvent event) {
+        final List<Integer> coveredSlots = new ArrayList<>();
+        for (Integer slot : event.getRawSlots()) {
+            if (event.getView().getInventory(slot) == renderer.getInventory())
+                coveredSlots.add(slot);
+        }
+        if (coveredSlots.isEmpty()) return;
+        Integer first = coveredSlots.get(0);
+        boolean cancel = handleClick(
+                event.getInventory(),
+                MenuAction.ActionType.LEFT,
+                MenuAction.ActionModifier.NONE,
+                event.getView().convertSlot(first),
+                event.getWhoClicked()
+        );
+        if (cancel) event.setCancelled(true);
     }
 
     public boolean handleClick(Inventory inventory, MenuAction.ActionType type, @Nullable MenuAction.ActionModifier modifier, int slot, HumanEntity whoClicked) {

@@ -17,6 +17,7 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -76,4 +77,9 @@ public class BrewTestMain extends JavaPlugin implements Listener {
         if (menu != null) menu.handleClick(event);
     }
 
+    @EventHandler
+    public void onDrag(InventoryDragEvent event) {
+        Menu menu = menus.get(event.getWhoClicked());
+        if (menu != null) menu.handleClick(event);
+    }
 }
