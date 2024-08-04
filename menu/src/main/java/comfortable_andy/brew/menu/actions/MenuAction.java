@@ -12,6 +12,23 @@ public interface MenuAction {
 
     @Builder
     record ActionCriteria(@NotNull ActionType type, @Nullable ActionModifier modifier) {
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            ActionCriteria criteria = (ActionCriteria) o;
+
+            if (type != criteria.type) return false;
+            return modifier == null || modifier == criteria.modifier;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = type.hashCode();
+            result = 31 * result + (modifier != null ? modifier.hashCode() : 0);
+            return result;
+        }
     }
 
     enum ActionType {
@@ -21,6 +38,7 @@ public interface MenuAction {
     }
 
     enum ActionModifier {
+        NONE,
         SHIFT,
         DOUBLE
     }
