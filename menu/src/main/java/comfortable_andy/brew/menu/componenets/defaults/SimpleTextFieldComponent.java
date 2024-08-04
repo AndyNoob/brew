@@ -1,7 +1,6 @@
-package comfortable_andy.brew.test_plugin.components;
+package comfortable_andy.brew.menu.componenets.defaults;
 
 import comfortable_andy.brew.menu.actions.MenuAction;
-import comfortable_andy.brew.menu.componenets.defaults.TextFieldComponent;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;

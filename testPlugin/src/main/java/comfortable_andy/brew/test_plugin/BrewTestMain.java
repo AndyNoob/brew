@@ -1,14 +1,14 @@
 package comfortable_andy.brew.test_plugin;
 
 import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketEvent;
 import com.mojang.brigadier.Command;
-import com.comphenix.protocol.ProtocolLibrary;
 import comfortable_andy.brew.menu.Menu;
 import comfortable_andy.brew.menu.componenets.Renderer;
-import comfortable_andy.brew.test_plugin.components.SimpleTextFieldComponent;
+import comfortable_andy.brew.menu.componenets.defaults.SimpleTextFieldComponent;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
