@@ -23,10 +23,10 @@ public class ScrollComponent extends FloatingComponent {
     private Integer page;
 
     @Builder
-    public ScrollComponent(Vector2i pos, boolean simulatePagination, boolean isHorizontal, int moveAmount, ItemStack back, ItemStack forward, IntegerRange range, BiConsumer<@Nullable Integer, @Nullable Integer> callback) {
+    public ScrollComponent(Vector2i pos, @Nullable IntegerRange range, boolean isHorizontal, int moveAmount, ItemStack back, ItemStack forward, BiConsumer<@Nullable Integer, @Nullable Integer> callback) {
         super(pos);
-        if (simulatePagination) page = range.getMinimum();
-        else page = null;
+        if (range == null) this.page = null;
+        else this.page = range.getMinimum();
         setZIndex(1);
         int backX = isHorizontal ? -1 : 0;
         int backY = isHorizontal ? 0 : 1;
@@ -39,7 +39,7 @@ public class ScrollComponent extends FloatingComponent {
         getActions().put((e, rel) -> {
             boolean isBack = rel.equals(backX, backY);
             final int oldPage = page;
-            if (simulatePagination) {
+            if (range != null) {
                 final int mod = isBack ? -1 : 1;
                 if (range.contains(page + mod)) {
                     page += mod;

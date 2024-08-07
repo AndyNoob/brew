@@ -10,7 +10,8 @@ import org.bukkit.inventory.ItemStack;
 import org.joml.Vector2i;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ScrollComponentTest extends TestWithMenu {
 
@@ -20,7 +21,6 @@ public class ScrollComponentTest extends TestWithMenu {
         renderer.setInventory(inv);
         ScrollComponent component = ScrollComponent.builder()
                 .pos(new Vector2i(4, 0))
-                .simulatePagination(true)
                 .moveAmount(10)
                 .isHorizontal(false)
                 .range(IntegerRange.of(-100, 100))
