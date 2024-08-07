@@ -12,8 +12,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector2i;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.BiConsumer;
 
 @Getter
@@ -22,7 +20,6 @@ public class SimpleTextFieldComponent extends TextFieldComponent {
     @Setter
     private ItemStack item;
     private final BiConsumer<HumanEntity, String> callback;
-    private final Map<HumanEntity, Inventory> reopens = new HashMap<>();
 
     public SimpleTextFieldComponent(@NotNull JavaPlugin plugin, @NotNull Vector2i position, ItemStack item, BiConsumer<HumanEntity, String> callback) {
         super(plugin, position);
@@ -44,12 +41,4 @@ public class SimpleTextFieldComponent extends TextFieldComponent {
         Bukkit.getScheduler().runTaskLater(plugin, () -> callback.accept(entity, str), 1);
     }
 
-    @Override
-    protected void reopenOriginal(HumanEntity entity) {
-        Inventory inventory = reopens.remove(entity);
-        if (inventory != null) {
-            entity.openInventory(inventory);
-            Bukkit.getScheduler().runTaskLater(plugin, () -> entity.openInventory(inventory), 0);
-        }
-    }
 }
