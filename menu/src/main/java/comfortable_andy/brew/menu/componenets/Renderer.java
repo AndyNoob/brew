@@ -65,7 +65,6 @@ public class Renderer {
 
     private void renderComponent(@NotNull final Inventory inventory, @NotNull Component component, boolean force) {
         if (!force && !component.getSnapshot().collectAndCheckChanged()) return;
-        System.out.println("rendering " + component.getClass().getSimpleName());
         for (Table.Item<ItemStack> item : component.getItemTable()) {
             if (item.value() == null) continue;
             final int index;
