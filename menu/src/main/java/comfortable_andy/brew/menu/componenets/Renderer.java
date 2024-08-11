@@ -68,7 +68,13 @@ public class Renderer {
         for (Table.Item<ItemStack> item : component.getItemTable()) {
             if (item.value() == null) continue;
             final int index;
-            if ((index = translateToIndex(inventory, new Vector2i(item.x(), item.y()), component.isFloating())) >= inventory.getSize() || index < 0)
+            Vector2i pos = component.getPosition();
+
+            if ((index = translateToIndex(
+                    inventory,
+                    new Vector2i(item.x() + pos.x, item.y() + pos.y),
+                    component.isFloating()
+            )) >= inventory.getSize() || index < 0)
                 continue;
             inventory.setItem(index, item.value());
         }

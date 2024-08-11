@@ -44,14 +44,15 @@ public class MenuTest extends TestWithMenu {
 
     @Test
     public void testRender() {
-        ButtonComponent component = new ButtonComponent(new Vector2i(0, 0));
+        ButtonComponent component = new ButtonComponent(new Vector2i(4, 3));
         menu.addComponent(component);
         Renderer renderer = menu.getRenderer();
         renderer.setInventory(inv);
         renderer.render();
-        assertEquals(Material.DIAMOND, Objects.requireNonNull(inv.getItem(CENTER_SLOT)).getType());
+        assertEquals(Material.DIAMOND, Objects.requireNonNull(inv.getItem(8)).getType());
         component.getPosition().x += 1000;
         assertDoesNotThrow(renderer::render);
+
     }
 
     public static class ScrollingComponent extends FloatingComponent {

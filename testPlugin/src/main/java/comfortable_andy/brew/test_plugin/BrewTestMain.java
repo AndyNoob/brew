@@ -8,6 +8,7 @@ import com.comphenix.protocol.events.PacketEvent;
 import com.mojang.brigadier.Command;
 import comfortable_andy.brew.menu.Menu;
 import comfortable_andy.brew.menu.componenets.Renderer;
+import comfortable_andy.brew.menu.componenets.defaults.SimpleButtonComponent;
 import comfortable_andy.brew.menu.componenets.defaults.SimpleTextFieldComponent;
 import comfortable_andy.brew.test_plugin.components.SimpleMultipleChoiceComponent;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
@@ -82,6 +83,22 @@ public class BrewTestMain extends JavaPlugin implements Listener {
                                 var menu = menus.compute(entity, (k, v) -> {
                                     Menu m = new Menu("yo ma", "bruh", "choices");
                                     m.addComponent(new SimpleMultipleChoiceComponent(this, new Vector2i(), new ItemStack(Material.PAPER), CommandSender::sendMessage));
+                                    return m;
+                                });
+                                openInv(entity, menu);
+                                return Command.SINGLE_SUCCESS;
+                            })
+            );
+            root.then(
+                    Commands.literal("render")
+                            .executes(s -> {
+                                final CommandSourceStack source = s.getSource();
+                                final CommandSender sender = source.getExecutor() == null ? source.getSender() : source.getExecutor();
+                                if (!(sender instanceof HumanEntity entity)) return 0;
+                                var menu = menus.compute(entity, (k, v) -> {
+                                    Menu m = new Menu("ew", "32", "32432");
+                                    m.addComponent(new SimpleButtonComponent(new Vector2i(-4, 3), 1, 1, new ItemStack(Material.BEACON), he -> {}));
+                                    m.addComponent(new SimpleButtonComponent(new Vector2i(3, -2), 3, 1, new ItemStack(Material.TORCH), he -> {}));
                                     return m;
                                 });
                                 openInv(entity, menu);
