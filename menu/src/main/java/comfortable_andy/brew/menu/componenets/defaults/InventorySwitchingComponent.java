@@ -45,13 +45,10 @@ public abstract class InventorySwitchingComponent<Inv extends Inventory> extends
 
     protected void handleClose(InventoryCloseEvent e) {
         Inventory inventory = e.getView().getTopInventory();
-        System.out.println("closing " + inventory);
-        System.out.println("opened " + this.openInv.get(e.getPlayer()));
         if (inventory != this.openInv.get(e.getPlayer())) return;
         Player player = (Player) e.getPlayer();
         player.giveExpLevels(0);
         if (this.dontReopen.remove(e.getPlayer()) == inventory) return;
-        System.out.println("reopening original from handling close");
         reopenOriginal(e.getPlayer());
     }
 
