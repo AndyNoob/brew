@@ -58,7 +58,7 @@ public class Renderer {
     public void tryRender(boolean force) {
         if (this.inventory == null) return;
         this.components.stream()
-                .filter(component -> component.getSnapshot().collectAndCheckChanged())
+                .filter(component -> force || component.getSnapshot().collectAndCheckChanged())
                 .sorted(Comparator.comparing(Component::getZIndex))
                 .forEach(component -> renderComponent(this.inventory, component, force));
     }
