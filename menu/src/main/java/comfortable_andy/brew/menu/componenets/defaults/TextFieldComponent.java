@@ -1,6 +1,6 @@
 package comfortable_andy.brew.menu.componenets.defaults;
 
-import comfortable_andy.brew.menu.componenets.Renderer;
+import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.PrepareAnvilEvent;
@@ -54,11 +54,18 @@ public abstract class TextFieldComponent extends InventorySwitchingComponent<Anv
         }
     }
 
-    public AnvilInventory getInventoryFor(HumanEntity entity) {
+    public void open(HumanEntity entity) {
+        Inventory old = entity.getOpenInventory().getTopInventory();
         final InventoryView view = entity.openAnvil(entity.getLocation(), true);
         assert view != null;
-        final Inventory anvil = view.getTopInventory();
-        return (AnvilInventory) anvil;
+        final AnvilInventory anvil = (AnvilInventory) view.getTopInventory();
+        anvil.setItem(0, new ItemStack(Material.PAPER));
+        storeReopenInfo(entity, old, anvil);
+    }
+
+    @Override
+    protected final AnvilInventory getInventoryFor(HumanEntity entity) {
+        return null;
     }
 
     protected abstract void onEnterText(HumanEntity entity, String str);
@@ -67,13 +74,6 @@ public abstract class TextFieldComponent extends InventorySwitchingComponent<Anv
     public void postRemoval() {
         super.postRemoval();
         PrepareAnvilEvent.getHandlerList().unregister(this.onPrepare);
-    }
-
-    @Override
-    public void setRenderer(@NotNull Renderer renderer) {
-        if (this.isRemoved)
-            throw new IllegalStateException("This component is already out of commission post removal, recreate another.");
-        super.setRenderer(renderer);
     }
 
 }

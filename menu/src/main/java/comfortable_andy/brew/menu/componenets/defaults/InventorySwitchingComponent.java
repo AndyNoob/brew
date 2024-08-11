@@ -1,5 +1,6 @@
 package comfortable_andy.brew.menu.componenets.defaults;
 
+import comfortable_andy.brew.menu.componenets.Renderer;
 import comfortable_andy.brew.menu.componenets.StaticComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
@@ -50,6 +51,7 @@ public abstract class InventorySwitchingComponent<Inv extends Inventory> extends
         Player player = (Player) e.getPlayer();
         player.giveExpLevels(0);
         if (this.dontReopen.remove(e.getPlayer()) == inventory) return;
+        System.out.println("reopening original from handling close");
         reopenOriginal(e.getPlayer());
     }
 
@@ -59,9 +61,13 @@ public abstract class InventorySwitchingComponent<Inv extends Inventory> extends
 
     public void open(HumanEntity entity) {
         Inv inv = getInventoryFor(entity);
-        this.reopens.put(entity, entity.getOpenInventory().getTopInventory());
-        this.openInv.put(entity, inv);
+        storeReopenInfo(entity, entity.getOpenInventory().getTopInventory(), inv);
         entity.openInventory(inv);
+    }
+
+    protected void storeReopenInfo(HumanEntity entity, Inventory old, Inv opening) {
+        this.reopens.put(entity, old);
+        this.openInv.put(entity, opening);
     }
 
     public void close(HumanEntity entity) {
@@ -94,6 +100,13 @@ public abstract class InventorySwitchingComponent<Inv extends Inventory> extends
         InventoryCloseEvent.getHandlerList().unregister(this.onClose);
         InventoryClickEvent.getHandlerList().unregister(this.onClick);
         InventoryDragEvent.getHandlerList().unregister(this.onDrag);
+    }
+
+    @Override
+    public void setRenderer(@NotNull Renderer renderer) {
+        if (this.isRemoved)
+            throw new IllegalStateException("This component is already out of commission post removal, recreate another.");
+        super.setRenderer(renderer);
     }
 
     private static final class NotListener implements Listener {
