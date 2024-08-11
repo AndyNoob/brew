@@ -65,6 +65,7 @@ public class Renderer {
 
     private void renderComponent(@NotNull final Inventory inventory, @NotNull Component component, boolean force) {
         if (!force && !component.getSnapshot().collectAndCheckChanged()) return;
+        System.out.println("rendering " + component.getClass().getSimpleName());
         for (Table.Item<ItemStack> item : component.getItemTable()) {
             if (item.value() == null) continue;
             final int index;
@@ -100,7 +101,7 @@ public class Renderer {
     /**
      * @return relative clicked position from the component
      */
-     @Nullable
+    @Nullable
     public Vector2i clickedRelativePosition(@NotNull Component component, @NotNull Vector2i screenPosition) {
         final Vector2i componentPosition = component.getPosition();
         final var collisionTable = component.getCollisionTable();
@@ -133,7 +134,7 @@ public class Renderer {
         final int height = NumberConversions.ceil(size / 9f);
         final Vector2i centerIndices = getInventoryCenterIndices(height);
         final Vector2i currentIndices = new Vector2i(i % 9, i / 9);
-        return currentIndices.sub(centerIndices);
+        return currentIndices.sub(centerIndices).mul(1, -1);
     }
 
     @NotNull

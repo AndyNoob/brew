@@ -29,9 +29,9 @@ public class ScrollComponent extends FloatingComponent {
         else this.page = range.getMinimum();
         setZIndex(1);
         int backX = isHorizontal ? -1 : 0;
-        int backY = isHorizontal ? 0 : 1;
+        int backY = isHorizontal ? 0 : -1;
         int forwardX = isHorizontal ? 1 : 0;
-        int forwardY = isHorizontal ? 0 : -1;
+        int forwardY = isHorizontal ? 0 : 1;
         getItemTable().set(backX, backY, back);
         getItemTable().set(forwardX, forwardY, forward);
         getCollisionTable().set(backX, backY);
