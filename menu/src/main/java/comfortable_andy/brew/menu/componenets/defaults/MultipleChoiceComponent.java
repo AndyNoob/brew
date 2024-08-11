@@ -7,6 +7,7 @@ import org.apache.commons.lang3.IntegerRange;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -23,11 +24,13 @@ import java.util.function.Supplier;
 public abstract class MultipleChoiceComponent extends InventorySwitchingComponent<Inventory> {
 
     private static final int MAX_CHOICES_PAGE = 9 * 5;
-    private final Inventory choiceInv;
-    private final Menu menu;
+    protected final Inventory choiceInv;
+    protected final Menu menu;
+    protected final BiConsumer<HumanEntity, String> callback;
 
     public MultipleChoiceComponent(@NotNull JavaPlugin plugin, @NotNull Vector2i position, BiConsumer<HumanEntity, String> callback) {
         super(plugin, position);
+        this.callback = callback;
         final int choiceSize = choices().size();
         int rows = NumberConversions.ceil(choiceSize / 9f);
         this.menu = new Menu(
@@ -48,13 +51,34 @@ public abstract class MultipleChoiceComponent extends InventorySwitchingComponen
         if (component != null)
             component.getPosition().set(renderer.translateToVec(this.choiceInv, invSize - 4 - 1));
         generateChoiceButtons();
+        renderer.render();
     }
 
     protected abstract String displayName();
 
     protected abstract Map<String, Supplier<ItemStack>> choices();
 
-    protected abstract void generateChoiceButtons();
+    protected void generateChoiceButtons() {
+        int i = 0;
+        for (Map.Entry<String, Supplier<ItemStack>> entry : choices().entrySet()) {
+            final int horizontalOffset = i / MAX_CHOICES_PAGE;
+            final int x = i % 9 - 4 + 9 * horizontalOffset;
+            final int y = i / 9;
+            this.menu.addComponent(new SimpleButtonComponent(
+                    new Vector2i(x, y),
+                    1,
+                    1,
+                    entry.getValue().get(),
+                    h -> this.callback.accept(h, entry.getKey())
+            ));
+            i++;
+        }
+    }
+
+    @Override
+    protected void handleClick(InventoryClickEvent e) {
+        this.menu.handleClick(e);
+    }
 
     @Nullable
     protected ScrollComponent makeScrollComponent(int pages) {
@@ -70,7 +94,7 @@ public abstract class MultipleChoiceComponent extends InventorySwitchingComponen
     }
 
     @Override
-    protected Inventory open(HumanEntity entity) {
+    protected Inventory getInventoryFor(HumanEntity entity) {
         entity.openInventory(this.choiceInv);
         return this.choiceInv;
     }

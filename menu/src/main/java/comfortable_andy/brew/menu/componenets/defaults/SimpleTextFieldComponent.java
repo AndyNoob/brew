@@ -6,7 +6,7 @@ import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
-import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
@@ -28,10 +28,7 @@ public class SimpleTextFieldComponent extends TextFieldComponent {
         getCollisionTable().set(0, 0);
         getItemTable().set(0, 0, item);
         getActions().put((h, rel) -> {
-            Inventory cur = h.getOpenInventory().getTopInventory();
-            reopens.put(h, cur);
-            Inventory anvil = open(h);
-            anvil.setItem(0, new ItemStack(Material.PAPER));
+            open(h);
             return true;
         }, MenuAction.ActionCriteria.builder().type(MenuAction.ActionType.LEFT).build());
     }
@@ -39,6 +36,14 @@ public class SimpleTextFieldComponent extends TextFieldComponent {
     @Override
     protected void onEnterText(HumanEntity entity, String str) {
         Bukkit.getScheduler().runTaskLater(plugin, () -> callback.accept(entity, str), 1);
+    }
+
+    @Override
+    public AnvilInventory getInventoryFor(HumanEntity entity) {
+        System.out.println("simple");
+        AnvilInventory anvil = super.getInventoryFor(entity);
+        anvil.setItem(0, new ItemStack(Material.PAPER));
+        return anvil;
     }
 
 }

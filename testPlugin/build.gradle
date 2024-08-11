@@ -23,6 +23,7 @@ dependencies {
 apply from: rootProject.file('buildSrc/shared.gradle')
 
 runServer {
+    minecraftVersion('1.21')
     jvmArgs('-Xms1G', '-Xmx1G')
     downloadPlugins {
         url 'https://ci.dmulloy2.net/job/ProtocolLib/lastSuccessfulBuild/artifact/build/libs/ProtocolLib.jar'

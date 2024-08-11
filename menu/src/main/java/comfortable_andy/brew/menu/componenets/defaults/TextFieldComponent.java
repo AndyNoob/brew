@@ -2,17 +2,12 @@ package comfortable_andy.brew.menu.componenets.defaults;
 
 import comfortable_andy.brew.menu.componenets.Renderer;
 import org.bukkit.entity.HumanEntity;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.PrepareAnvilEvent;
 import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.EventExecutor;
 import org.bukkit.plugin.RegisteredListener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
@@ -23,22 +18,13 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public abstract class TextFieldComponent extends InventorySwitchingComponent<AnvilInventory> {
 
-    private static final NotListener LISTENER = new NotListener();
-
-    private boolean isRemoved = false;
     private final RegisteredListener onPrepare;
-    private final RegisteredListener onClick;
-    private final RegisteredListener onClose;
+    protected final AtomicReference<ItemStack> resultReference = new AtomicReference<>(null);
 
     public TextFieldComponent(@NotNull JavaPlugin plugin, @NotNull Vector2i position) {
         super(plugin, position);
-        final AtomicReference<ItemStack> resultReference = new AtomicReference<>(null);
         this.onPrepare = makeListener(plugin, (l, e) -> handleRenaming((PrepareAnvilEvent) e, resultReference));
-        this.onClick = makeListener(plugin, (l, e) -> handleFinish((InventoryClickEvent) e, resultReference));
-        this.onClose = makeListener(plugin, (l, e) -> handleClose((InventoryCloseEvent) e, resultReference));
         PrepareAnvilEvent.getHandlerList().register(this.onPrepare);
-        InventoryClickEvent.getHandlerList().register(this.onClick);
-        InventoryCloseEvent.getHandlerList().register(this.onClose);
     }
 
     private void handleRenaming(PrepareAnvilEvent e, AtomicReference<ItemStack> resultReference) {
@@ -49,7 +35,8 @@ public abstract class TextFieldComponent extends InventorySwitchingComponent<Anv
     }
 
     @SuppressWarnings("deprecation")
-    private void handleFinish(InventoryClickEvent e, AtomicReference<ItemStack> resultReference) {
+    @Override
+    protected void handleClick(InventoryClickEvent e) {
         Inventory inventory = e.getClickedInventory();
         if (inventory == null) return;
         if (inventory != this.openInv.get(e.getWhoClicked())) return;
@@ -63,49 +50,23 @@ public abstract class TextFieldComponent extends InventorySwitchingComponent<Anv
                     e.getWhoClicked(),
                     Objects.requireNonNullElse(str, "")
             );
-            reopenOriginal(e.getWhoClicked());
-            this.dontReopen.put(e.getWhoClicked(), inventory);
+            close(e.getWhoClicked());
         }
     }
 
-    private void handleClose(InventoryCloseEvent e, AtomicReference<ItemStack> resultReference) {
-        Inventory inventory = e.getView().getTopInventory();
-        if (inventory != this.openInv.remove(e.getPlayer())) return;
-        resultReference.set(null);
-        Player player = (Player) e.getPlayer();
-        player.giveExpLevels(0);
-        if (this.dontReopen.remove(e.getPlayer()) == inventory) return;
-        reopenOriginal(e.getPlayer());
-    }
-
-    public AnvilInventory open(HumanEntity entity) {
+    public AnvilInventory getInventoryFor(HumanEntity entity) {
         final InventoryView view = entity.openAnvil(entity.getLocation(), true);
         assert view != null;
         final Inventory anvil = view.getTopInventory();
-        this.openInv.put(entity, anvil);
         return (AnvilInventory) anvil;
     }
 
     protected abstract void onEnterText(HumanEntity entity, String str);
 
-    @NotNull
-    private RegisteredListener makeListener(@NotNull JavaPlugin plugin, EventExecutor executor) {
-        return new RegisteredListener(
-                LISTENER,
-                executor,
-                EventPriority.NORMAL,
-                plugin,
-                false
-        );
-    }
-
     @Override
     public void postRemoval() {
-        System.out.println("remove");
-        this.isRemoved = true;
+        super.postRemoval();
         PrepareAnvilEvent.getHandlerList().unregister(this.onPrepare);
-        InventoryClickEvent.getHandlerList().unregister(this.onClick);
-        InventoryCloseEvent.getHandlerList().unregister(this.onClose);
     }
 
     @Override
@@ -113,9 +74,6 @@ public abstract class TextFieldComponent extends InventorySwitchingComponent<Anv
         if (this.isRemoved)
             throw new IllegalStateException("This component is already out of commission post removal, recreate another.");
         super.setRenderer(renderer);
-    }
-
-    private static final class NotListener implements Listener {
     }
 
 }

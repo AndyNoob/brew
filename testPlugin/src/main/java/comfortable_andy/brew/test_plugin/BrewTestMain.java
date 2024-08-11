@@ -9,6 +9,7 @@ import com.mojang.brigadier.Command;
 import comfortable_andy.brew.menu.Menu;
 import comfortable_andy.brew.menu.componenets.Renderer;
 import comfortable_andy.brew.menu.componenets.defaults.SimpleTextFieldComponent;
+import comfortable_andy.brew.test_plugin.components.SimpleMultipleChoiceComponent;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
@@ -57,7 +58,7 @@ public class BrewTestMain extends JavaPlugin implements Listener {
                                 final CommandSourceStack source = s.getSource();
                                 final CommandSender sender = source.getExecutor() == null ? source.getSender() : source.getExecutor();
                                 if (!(sender instanceof HumanEntity entity)) return 0;
-                                Menu menu = menus.computeIfAbsent(entity, k -> {
+                                Menu menu = menus.compute(entity, (k, v) -> {
                                     Menu m = new Menu("yo", entity.getName(), "bruhhhh");
                                     final ItemStack item = new ItemStack(Material.PAPER);
                                     item.editMeta(meta -> meta.displayName(Component.text("<not set>", Style.style(TextDecoration.ITALIC))));
@@ -68,16 +69,35 @@ public class BrewTestMain extends JavaPlugin implements Listener {
                                     }));
                                     return m;
                                 });
-                                Renderer renderer = menu.getRenderer();
-                                Inventory inventory = renderer.getInventory() == null ? Bukkit.createInventory(null, 54) : renderer.getInventory();
-                                renderer.setInventory(inventory);
-                                entity.openInventory(inventory);
-                                renderer.render();
+                                openInv(entity, menu);
+                                return Command.SINGLE_SUCCESS;
+                            })
+            );
+            root.then(
+                    Commands.literal("multiple")
+                            .executes(s -> {
+                                final CommandSourceStack source = s.getSource();
+                                final CommandSender sender = source.getExecutor() == null ? source.getSender() : source.getExecutor();
+                                if (!(sender instanceof HumanEntity entity)) return 0;
+                                var menu = menus.compute(entity, (k, v) -> {
+                                    Menu m = new Menu("yo ma", "bruh", "choices");
+                                    m.addComponent(new SimpleMultipleChoiceComponent(this, new Vector2i(), new ItemStack(Material.PAPER), CommandSender::sendMessage));
+                                    return m;
+                                });
+                                openInv(entity, menu);
                                 return Command.SINGLE_SUCCESS;
                             })
             );
             commands.register(root.build());
         });
+    }
+
+    private static void openInv(HumanEntity entity, Menu menu) {
+        Renderer renderer = menu.getRenderer();
+        Inventory inventory = renderer.getInventory() == null ? Bukkit.createInventory(null, 54) : renderer.getInventory();
+        renderer.setInventory(inventory);
+        entity.openInventory(inventory);
+        renderer.render();
     }
 
     private void registerProtocolLib() {
