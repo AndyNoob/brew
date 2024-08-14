@@ -86,7 +86,7 @@ public class Renderer {
 
     /**
      * @param screenPosition the xy screen position to check
-     * @return a list of components that contain the position, with larger z index appearing earlier in the list
+     * @return a map of components that contain the position, with larger z index appearing earlier in the list AND the {@link Renderer#clickedRelativePosition(Component, Vector2i)} of the component
      */
     public Map<Component, Vector2i> componentsAt(@NotNull Vector2i screenPosition) {
         return this.components.stream()
