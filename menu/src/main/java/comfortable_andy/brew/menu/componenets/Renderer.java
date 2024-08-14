@@ -61,14 +61,19 @@ public class Renderer {
 
     public void tryRender(boolean force) {
         if (this.inventory == null) return;
-        this.components.stream()
+        // TODO make snapshots actually work
+        final List<Component> rendering = this.components.stream()
                 .filter(component -> force || component.getSnapshot().collectAndCheckChanged())
-                .sorted(Comparator.comparing(Component::getZIndex))
-                .forEach(component -> renderComponent(this.inventory, component, force));
+                .sorted(Comparator.comparing(Component::getZIndex)).
+                toList();
+        if (rendering.isEmpty()) return;
+        this.inventory.clear();
+        for (Component component : rendering) {
+            renderComponent(this.inventory, component);
+        }
     }
 
-    private void renderComponent(@NotNull final Inventory inventory, @NotNull Component component, boolean force) {
-        if (!force && !component.getSnapshot().collectAndCheckChanged()) return;
+    private void renderComponent(@NotNull final Inventory inventory, @NotNull Component component) {
         final Vector2i pos = component.getPosition();
         for (Table.Item<ItemStack> item : component.getItemTable()) {
             if (item.value() == null) continue;

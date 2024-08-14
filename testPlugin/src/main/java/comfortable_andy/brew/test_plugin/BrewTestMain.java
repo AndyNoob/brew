@@ -8,6 +8,7 @@ import com.comphenix.protocol.events.PacketEvent;
 import com.mojang.brigadier.Command;
 import comfortable_andy.brew.menu.Menu;
 import comfortable_andy.brew.menu.componenets.Renderer;
+import comfortable_andy.brew.menu.componenets.defaults.ScrollComponent;
 import comfortable_andy.brew.menu.componenets.defaults.SimpleButtonComponent;
 import comfortable_andy.brew.menu.componenets.defaults.SimpleTextFieldComponent;
 import comfortable_andy.brew.test_plugin.components.SimpleMultipleChoiceComponent;
@@ -17,6 +18,7 @@ import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.apache.commons.lang3.IntegerRange;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
@@ -99,6 +101,15 @@ public class BrewTestMain extends JavaPlugin implements Listener {
                                     Menu m = new Menu("ew", "32", "32432");
                                     m.addComponent(new SimpleButtonComponent(new Vector2i(-4, 3), 1, 1, new ItemStack(Material.BEACON), he -> {}));
                                     m.addComponent(new SimpleButtonComponent(new Vector2i(3, -2), 3, 1, new ItemStack(Material.TORCH), he -> {}));
+                                    m.addComponent(new ScrollComponent(
+                                            new Vector2i(0, -2),
+                                            IntegerRange.of(1, 10),
+                                            true,
+                                            1,
+                                            new ItemStack(Material.DIAMOND),
+                                            new ItemStack(Material.DIAMOND),
+                                            (a, b) -> m.getRenderer().render()
+                                    ));
                                     return m;
                                 });
                                 openInv(entity, menu);
