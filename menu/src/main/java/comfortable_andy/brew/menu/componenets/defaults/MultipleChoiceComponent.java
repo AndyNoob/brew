@@ -64,11 +64,14 @@ public abstract class MultipleChoiceComponent extends InventorySwitchingComponen
 
     protected void generateChoiceButtons() {
         int i = 0;
+
         for (Map.Entry<String, Supplier<ItemStack>> entry : choices().entrySet()) {
             final int horizontalOffset = i / MAX_CHOICES_PAGE;
             final int x = i % 9 - 4 + 9 * horizontalOffset;
-            final int y = i / 9 + this.rows / 2;
+            System.out.println(i % MAX_CHOICES_PAGE);
+            final int y = this.rows / 2 - (i % MAX_CHOICES_PAGE) / 9 - 1;
             Vector2i pos = new Vector2i(x, y);
+            System.out.println(pos);
             this.menu.addComponent(new SimpleButtonComponent(
                     pos,
                     1,

@@ -9,8 +9,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector2i;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
@@ -33,9 +32,16 @@ public class SimpleMultipleChoiceComponent extends MultipleChoiceComponent {
 
     @Override
     protected Map<String, Supplier<ItemStack>> choices() {
+        final List<Material> itemMats = new ArrayList<>(Arrays.stream(Material.values())
+                .filter(Material::isItem)
+                .filter(material -> !material.isLegacy())
+                .toList());
+        Collections.shuffle(itemMats);
         return new LinkedHashMap<>() {{
-            put("thing", () -> new ItemStack(Material.BLUE_BANNER));
-            put("other thing", () -> new ItemStack(Material.RED_BANNER));
+            for (int i = 0; i < 60; i++) {
+                int finalI = i;
+                put(i + "", () -> new ItemStack(itemMats.get(finalI)));
+            }
         }};
     }
 }

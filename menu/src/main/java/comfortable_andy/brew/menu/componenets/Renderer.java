@@ -109,8 +109,7 @@ public class Renderer {
         final Vector2i componentPosition = component.getPosition();
         final var collisionTable = component.getCollisionTable();
 
-        final boolean shouldBeAbsolute = !component.isFloating();
-        final Vector2i clickPosition = shouldBeAbsolute ? getViewAnchor().add(screenPosition, new Vector2i()) : screenPosition;
+        final Vector2i clickPosition = component.isFloating() ? screenPosition : getViewAnchor().add(screenPosition, new Vector2i());
         final Vector2i clickPosComponentSpace = new Vector2i(clickPosition)
                 .sub(componentPosition);
 
@@ -128,8 +127,8 @@ public class Renderer {
         offset.y *= Direction.UP.get().y;
         offset.x *= Direction.RIGHT.get().x;
         final Vector2i finalPosition = rowColumn.add(offset);
-        if (finalPosition.x < 0 || finalPosition.y < 0) return -1;
-        if (finalPosition.x >= 9 || finalPosition.y >= height) return -1;
+        if (finalPosition.x < 0 || finalPosition.x >= 9) return -1;
+        if (finalPosition.y < 0 || finalPosition.y >= height) return -1;
         return finalPosition.y() * 9 + finalPosition.x();
     }
 
