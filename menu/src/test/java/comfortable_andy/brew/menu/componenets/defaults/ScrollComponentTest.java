@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ScrollComponentTest extends TestWithMenu {
 
+    @SuppressWarnings("DataFlowIssue")
     @Test
     public void testScroll() {
         Renderer renderer = menu.getRenderer();
@@ -33,8 +34,10 @@ public class ScrollComponentTest extends TestWithMenu {
                 .back(new ItemStack(Material.DIAMOND))
                 .build();
         menu.addComponent(component);
-        assertThrows(IllegalStateException.class, () -> menu.handleClick(inv, MenuAction.ActionType.LEFT, null, MenuTest.CENTER_SLOT + 4 - 9, null));
+        renderer.render();
+        assertThrows(IllegalStateException.class, () -> menu.handleClick(inv, MenuAction.ActionType.LEFT, null, MenuTest.CENTER_SLOT + 4 + 9, null));
         assertEquals(new Vector2i(0, 10), renderer.getViewAnchor());
+        assertEquals(Material.DIAMOND, inv.getItem(MenuTest.CENTER_SLOT + 4 - 9).getType());
     }
 
 }
