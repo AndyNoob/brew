@@ -13,7 +13,11 @@ import org.jetbrains.annotations.Range;
 import org.joml.Vector2i;
 
 import java.util.*;
+import java.util.function.Supplier;
 
+/**
+ * @see Direction
+ */
 public class Renderer {
 
     @Getter
@@ -65,10 +69,10 @@ public class Renderer {
 
     private void renderComponent(@NotNull final Inventory inventory, @NotNull Component component, boolean force) {
         if (!force && !component.getSnapshot().collectAndCheckChanged()) return;
+        final Vector2i pos = component.getPosition();
         for (Table.Item<ItemStack> item : component.getItemTable()) {
             if (item.value() == null) continue;
             final int index;
-            Vector2i pos = component.getPosition();
 
             if ((index = translateToIndex(
                     inventory,
@@ -118,10 +122,12 @@ public class Renderer {
         assert inventory.getType() == InventoryType.CHEST;
         final int size = inventory.getSize();
         final int height = NumberConversions.ceil(size / 9f);
-        final Vector2i centerIndices = getInventoryCenterIndices(height);
+        final Vector2i rowColumn = getInventoryCenterRowColumn(height);
         final Vector2i offset = isLocalSpace ? position : position.sub(this.worldSpaceAnchor, new Vector2i());
         offset.y *= -1;
-        final Vector2i finalPosition = centerIndices.add(offset);
+        offset.y *= Direction.UP.get().y;
+        offset.x *= Direction.RIGHT.get().x;
+        final Vector2i finalPosition = rowColumn.add(offset);
         if (finalPosition.x < 0 || finalPosition.y < 0) return -1;
         if (finalPosition.x >= 9 || finalPosition.y >= height) return -1;
         return finalPosition.y() * 9 + finalPosition.x();
@@ -131,14 +137,25 @@ public class Renderer {
         assert inventory.getType() == InventoryType.CHEST;
         final int size = inventory.getSize();
         final int height = NumberConversions.ceil(size / 9f);
-        final Vector2i centerIndices = getInventoryCenterIndices(height);
-        final Vector2i currentIndices = new Vector2i(i % 9, i / 9);
-        return currentIndices.sub(centerIndices).mul(1, -1);
+        final Vector2i centerRowColumn = getInventoryCenterRowColumn(height);
+        final Vector2i currentRowColumn = new Vector2i(i % 9, i / 9);
+        return currentRowColumn.sub(centerRowColumn)
+                .mul(1, -1)
+                .mul(Direction.RIGHT.get().x, Direction.UP.get().y);
     }
 
     @NotNull
-    private static Vector2i getInventoryCenterIndices(int height) {
+    private static Vector2i getInventoryCenterRowColumn(int height) {
         return new Vector2i(9 / 2, height / 2);
+    }
+
+    public static final class Direction {
+
+        public static final Supplier<Vector2i> UP = () -> new Vector2i(0, 1);
+        public static final Supplier<Vector2i> DOWN = () -> UP.get().negate();
+        public static final Supplier<Vector2i> RIGHT = () -> new Vector2i(1, 0);
+        public static final Supplier<Vector2i> LEFT = () -> RIGHT.get().negate();
+
     }
 
 }
