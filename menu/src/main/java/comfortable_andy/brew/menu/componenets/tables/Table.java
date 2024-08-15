@@ -10,13 +10,15 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 import org.joml.Vector2i;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.stream.IntStream;
 
 @RequiredArgsConstructor
 @EqualsAndHashCode
 @ToString
-public abstract class Table<T> implements Iterable<Table.Item<T>>, Cloneable {
+public abstract class Table<T, Self extends Table<T, Self>> implements Iterable<Table.Item<T>>, Cloneable {
 
     private final Map<Vector2i, T> table = new HashMap<>();
 
@@ -71,10 +73,10 @@ public abstract class Table<T> implements Iterable<Table.Item<T>>, Cloneable {
 
     @SuppressWarnings("unchecked")
     @Override
-    public Table<T> clone() {
+    public Self clone() {
         try {
-            final Table<T> clone = (Table<T>) super.clone();
-            clone.table.replaceAll((v, t) -> clone(t));
+            final Self clone = (Self) super.clone();
+            ((Table<T, Self>) clone).table.replaceAll((v, t) -> clone(t));
             return clone;
         } catch (CloneNotSupportedException e) {
             throw new AssertionError();

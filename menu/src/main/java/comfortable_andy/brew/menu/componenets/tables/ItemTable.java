@@ -6,7 +6,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 @ToString(callSuper = true)
-public class ItemTable extends Table<ItemStack> {
+public class ItemTable extends Table<ItemStack, ItemTable> {
 
     @Override
     protected @Nullable ItemStack defaultValue() {

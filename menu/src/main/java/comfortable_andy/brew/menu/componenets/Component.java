@@ -7,7 +7,6 @@ import lombok.*;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector2i;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -29,13 +28,13 @@ public abstract class Component implements Comparable<Component> {
     private final @NotNull Vector2i position;
     private final Map<MenuAction, MenuAction.ActionCriteria> actions = new HashMap<>();
 
-    private final Snapshot snapshot = new Snapshot(
-            this::isFloating,
-            () -> getCollisionTable().clone(),
-            () -> new Vector2i(getPosition()),
-            () -> getItemTable().clone(),
-            () -> this.renderedBy == null ? null : this.renderedBy.getViewAnchor()
-    );
+    private final Snapshot snapshot = Snapshot.builder()
+            .collision(() -> getCollisionTable().clone())
+            .items(() -> getItemTable().clone())
+            .position(() -> new Vector2i(getPosition()))
+            .viewAnchor(() -> this.renderedBy == null ? null : this.renderedBy.getViewAnchor())
+            .state("floating", this::isFloating)
+            .build();
     @Getter(AccessLevel.PROTECTED)
     @Setter(AccessLevel.PACKAGE)
     private Renderer renderedBy = null;
@@ -58,20 +57,29 @@ public abstract class Component implements Comparable<Component> {
         return Integer.compare(zIndex, o.zIndex);
     }
 
+    @Getter
     public static class Snapshot {
 
-        @SafeVarargs
-        private Snapshot(@NotNull Supplier<Object>... suppliers) {
-            Arrays.stream(suppliers).forEach(this::registerToCheck);
+        private final Supplier<CollisionTable> collision;
+        private final Supplier<ItemTable> items;
+        private final Supplier<Vector2i> position;
+        private final Supplier<Vector2i> viewAnchor;
+        @Getter(AccessLevel.NONE)
+        private final Map<String, Supplier<Object>> states;
+        @Getter(AccessLevel.NONE)
+        private final Map<String, Object> prevStates = new HashMap<>();
+
+        @Builder
+        public Snapshot(Supplier<CollisionTable> collision, Supplier<ItemTable> items, Supplier<Vector2i> position, Supplier<Vector2i> viewAnchor, @Singular Map<String, Supplier<Object>> states) {
+            this.collision = collision;
+            this.items = items;
+            this.position = position;
+            this.viewAnchor = viewAnchor;
+            this.states = states;
         }
 
-        private final Map<Supplier<Object>, Object> states = new HashMap<>();
-
-        /**
-         * @param stateSupplier WILL be invoked <bold>REGULARLY</bold>, insert with caution.
-         */
-        public void registerToCheck(@NotNull Supplier<Object> stateSupplier) {
-            this.states.put(stateSupplier, null);
+        public void registerToCheck(String id, @NotNull Supplier<Object> stateSupplier) {
+            this.states.put(id, stateSupplier);
         }
 
         /**
@@ -80,11 +88,20 @@ public abstract class Component implements Comparable<Component> {
         public boolean collectAndCheckChanged() {
             boolean changed = false;
 
-            for (Map.Entry<Supplier<Object>, Object> entry : this.states.entrySet()) {
-                final Object oldState = entry.getValue();
-                final Object newState = entry.getKey().get();
+            final Map<String, Supplier<?>> map = new HashMap<>(this.states);
+            map.putAll(Map.of(
+                    System.currentTimeMillis() + "", this.collision,
+                    System.currentTimeMillis() + "", this.items,
+                    System.currentTimeMillis() + "", this.position,
+                    System.currentTimeMillis() + "", this.viewAnchor
+            ));
 
-                entry.setValue(newState);
+            for (Map.Entry<String, Supplier<?>> entry : map.entrySet()) {
+                final Object oldState = this.prevStates.get(entry.getKey());
+                final Object newState = this.prevStates.compute(
+                        entry.getKey(),
+                        (k, v) -> entry.getValue().get()
+                );
 
                 if (!Objects.equals(oldState, newState)) changed = true;
             }

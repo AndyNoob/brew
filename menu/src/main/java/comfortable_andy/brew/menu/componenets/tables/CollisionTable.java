@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 @Getter
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class CollisionTable extends Table<Boolean> {
+public class CollisionTable extends Table<Boolean, CollisionTable> {
 
     @Override
     protected @Nullable Boolean defaultValue() {
