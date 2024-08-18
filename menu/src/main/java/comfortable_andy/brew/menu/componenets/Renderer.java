@@ -81,7 +81,6 @@ public class Renderer {
                 final var posSnapping = snapshot.getPosition().clone();
                 final var floatingSnapping = snapshot.getFloating().clone();
                 if (!changed) continue;
-                final Set<Vector2i> changedPositions = new HashSet<>();
                 final Vector2i oldPos = posSnapping.getVal();
                 if (Objects.equals(true, floatingSnapping.getVal())) {
                     oldPos.add(getViewAnchor());
@@ -93,12 +92,18 @@ public class Renderer {
                 if (!itemSnapping.equals(snapshot.getItems())) {
                     for (Table.Item<ItemStack> item : itemSnapping.getVal()) {
                         final Vector2i relPos = new Vector2i(item.x(), item.y());
-                        relPos.add(oldPos);
-                        // TODO add all impacted components
+                        final Vector2i actualPos = relPos.add(oldPos, new Vector2i());
+                        rendering.addAll(componentsAt(actualPos.sub(getViewAnchor(), new Vector2i())).keySet());
+                    }
+                    for (Table.Item<ItemStack> item : snapshot.getItems().getVal()) {
+                        final Vector2i relPos = new Vector2i(item.x(), item.y());
+                        final Vector2i actualPos = relPos.add(newPos, new Vector2i());
+                        rendering.addAll(componentsAt(actualPos.sub(getViewAnchor(), new Vector2i())).keySet());
                     }
                 }
             }
         }
+        rendering.forEach(c -> this.renderComponent(this.inventory, c));
     }
 
     private void renderComponent(@NotNull final Inventory inventory, @NotNull Component component) {
