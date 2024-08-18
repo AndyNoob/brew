@@ -111,7 +111,7 @@ public abstract class Component implements Comparable<Component> {
 
         @Data
         @ToString
-        public static class Snapping<T> {
+        public static class Snapping<T> implements Cloneable {
 
             @ToString.Exclude
             private final Supplier<T> supplier;
@@ -120,6 +120,16 @@ public abstract class Component implements Comparable<Component> {
             @SuppressWarnings("unchecked")
             public void setVal(Object val) {
                 this.val = (T) val;
+            }
+
+            @SuppressWarnings("unchecked")
+            @Override
+            public Snapping<T> clone() {
+                try {
+                    return (Snapping<T>) super.clone();
+                } catch (CloneNotSupportedException e) {
+                    throw new AssertionError();
+                }
             }
         }
 
