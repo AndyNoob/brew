@@ -8,6 +8,8 @@ import lombok.experimental.Accessors;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector2i;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.function.Supplier;
 
@@ -134,9 +136,17 @@ public abstract class Component implements Comparable<Component> {
             @Override
             public Snapping<T> clone() {
                 try {
-                    return (Snapping<T>) super.clone();
+                    final Snapping<T> clone = (Snapping<T>) super.clone();
+                    if (this.val instanceof Cloneable cloneable) {
+                        final Method cloneMethod = cloneable.getClass().getMethod("clone");
+                        if (Modifier.isPublic(cloneMethod.getModifiers()))
+                            clone.setVal(cloneMethod.invoke(this.val));
+                    }
+                    return clone;
                 } catch (CloneNotSupportedException e) {
                     throw new AssertionError();
+                } catch (ReflectiveOperationException e) {
+                    throw new RuntimeException(e);
                 }
             }
 

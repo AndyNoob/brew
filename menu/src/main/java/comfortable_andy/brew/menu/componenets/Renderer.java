@@ -63,47 +63,64 @@ public class Renderer {
     public void tryRender(boolean force) {
         if (this.inventory == null) return;
         // TODO make snapshots actually work
-        final SortedSet<Component> rendering;
+        final Set<Component> rendering;
         if (force) {
+            System.out.println("force");
             this.inventory.clear();
-            rendering = this.components.stream().sorted().collect(Collectors.toCollection(TreeSet::new));
+            rendering = this.components.stream().sorted().collect(Collectors.toCollection(LinkedHashSet::new));
         } else {
-            rendering = new TreeSet<>();
+            rendering = new LinkedHashSet<>();
             for (Component component : this.components) {
                 final Component.Snapshot snapshot = component.getSnapshot();
                 final boolean checkedBefore = snapshot.hasChecked();
+                final var itemSnapping = snapshot.getItems().clone();
+                final var posSnapping = snapshot.getPosition().clone();
+                final var floatingSnapping = snapshot.getFloating().clone();
+                final var anchor = snapshot.getViewAnchor().clone();
                 final boolean changed = snapshot.collectAndCheckChanged();
                 if (!checkedBefore) {
                     rendering.add(component);
                     continue;
                 }
-                final var itemSnapping = snapshot.getItems().clone();
-                final var posSnapping = snapshot.getPosition().clone();
-                final var floatingSnapping = snapshot.getFloating().clone();
                 if (!changed) continue;
                 final Vector2i oldPos = posSnapping.getVal();
                 if (Objects.equals(true, floatingSnapping.getVal())) {
-                    oldPos.add(getViewAnchor());
+                    oldPos.add(anchor.getVal() == null ? getViewAnchor() : anchor.getVal());
                 }
                 final Vector2i newPos = snapshot.getPosition().getVal();
                 if (Objects.equals(true, snapshot.getFloating().getVal())) {
                     newPos.add(getViewAnchor());
                 }
-                if (!itemSnapping.equals(snapshot.getItems())) {
+                final Set<Vector2i> changedPos = new HashSet<>();
+                final boolean itemsChanged = !itemSnapping.equals(snapshot.getItems());
+                final boolean anchorChanged = !Objects.equals(anchor.getVal(), getViewAnchor());
+                System.out.println(itemsChanged + " || " + anchorChanged);
+                System.out.println(itemSnapping.getVal() + " -> " + snapshot.getItems().getVal());
+                System.out.println(anchor.getVal() + " -> " + snapshot.getViewAnchor().getVal() + " or " + getViewAnchor());
+                if (itemsChanged || anchorChanged) {
+                    System.out.println("updating item");
                     for (Table.Item<ItemStack> item : itemSnapping.getVal()) {
                         final Vector2i relPos = new Vector2i(item.x(), item.y());
                         final Vector2i actualPos = relPos.add(oldPos, new Vector2i());
                         rendering.addAll(componentsAt(actualPos.sub(getViewAnchor(), new Vector2i())).keySet());
+                        changedPos.add(actualPos);
                     }
                     for (Table.Item<ItemStack> item : snapshot.getItems().getVal()) {
                         final Vector2i relPos = new Vector2i(item.x(), item.y());
                         final Vector2i actualPos = relPos.add(newPos, new Vector2i());
                         rendering.addAll(componentsAt(actualPos.sub(getViewAnchor(), new Vector2i())).keySet());
+                        changedPos.add(actualPos);
+                    }
+                    for (Vector2i pos : changedPos) {
+                        int i = this.translateToIndex(this.inventory, pos, false);
+                        if (i != -1)
+                            this.inventory.setItem(i, null);
                     }
                 }
             }
         }
-        rendering.forEach(c -> this.renderComponent(this.inventory, c));
+        System.out.println("rendering [" + rendering.stream().map(c -> c.getClass().getSimpleName()).collect(Collectors.joining(", ")) + "]");
+        if (force) rendering.forEach(c -> this.renderComponent(this.inventory, c));
     }
 
     private void renderComponent(@NotNull final Inventory inventory, @NotNull Component component) {
