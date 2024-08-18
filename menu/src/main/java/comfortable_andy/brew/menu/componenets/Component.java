@@ -103,17 +103,24 @@ public abstract class Component implements Comparable<Component> {
                 final Object newState = snapping.getSupplier().get();
 
                 if (!Objects.equals(oldState, newState)) changed = true;
+                snapping.setVal(newState);
             }
 
             return changed;
         }
 
         @Data
+        @ToString
         public static class Snapping<T> {
 
+            @ToString.Exclude
             private final Supplier<T> supplier;
             private T val = null;
 
+            @SuppressWarnings("unchecked")
+            public void setVal(Object val) {
+                this.val = (T) val;
+            }
         }
 
     }
