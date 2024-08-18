@@ -14,6 +14,7 @@ import org.joml.Vector2i;
 
 import java.util.*;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * @see Direction
@@ -62,14 +63,41 @@ public class Renderer {
     public void tryRender(boolean force) {
         if (this.inventory == null) return;
         // TODO make snapshots actually work
-        final List<Component> rendering = this.components.stream()
-                .filter(component -> force || component.getSnapshot().collectAndCheckChanged())
-                .sorted(Comparator.comparing(Component::getZIndex)).
-                toList();
-        if (rendering.isEmpty()) return;
-        this.inventory.clear();
-        for (Component component : rendering) {
-            renderComponent(this.inventory, component);
+        final SortedSet<Component> rendering;
+        if (force) {
+            this.inventory.clear();
+            rendering = this.components.stream().sorted().collect(Collectors.toCollection(TreeSet::new));
+        } else {
+            rendering = new TreeSet<>();
+            for (Component component : this.components) {
+                final Component.Snapshot snapshot = component.getSnapshot();
+                final boolean checkedBefore = snapshot.hasChecked();
+                final boolean changed = snapshot.collectAndCheckChanged();
+                if (!checkedBefore) {
+                    rendering.add(component);
+                    continue;
+                }
+                final var itemSnapping = snapshot.getItems().clone();
+                final var posSnapping = snapshot.getPosition().clone();
+                final var floatingSnapping = snapshot.getFloating().clone();
+                if (!changed) continue;
+                final Set<Vector2i> changedPositions = new HashSet<>();
+                final Vector2i oldPos = posSnapping.getVal();
+                if (Objects.equals(true, floatingSnapping.getVal())) {
+                    oldPos.add(getViewAnchor());
+                }
+                final Vector2i newPos = snapshot.getPosition().getVal();
+                if (Objects.equals(true, snapshot.getFloating().getVal())) {
+                    newPos.add(getViewAnchor());
+                }
+                if (!itemSnapping.equals(snapshot.getItems())) {
+                    for (Table.Item<ItemStack> item : itemSnapping.getVal()) {
+                        final Vector2i relPos = new Vector2i(item.x(), item.y());
+                        relPos.add(oldPos);
+                        // TODO add all impacted components
+                    }
+                }
+            }
         }
     }
 

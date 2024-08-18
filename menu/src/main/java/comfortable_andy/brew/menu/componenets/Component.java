@@ -4,6 +4,7 @@ import comfortable_andy.brew.menu.actions.MenuAction;
 import comfortable_andy.brew.menu.componenets.tables.CollisionTable;
 import comfortable_andy.brew.menu.componenets.tables.ItemTable;
 import lombok.*;
+import lombok.experimental.Accessors;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector2i;
 
@@ -31,7 +32,7 @@ public abstract class Component implements Comparable<Component> {
             .items(() -> getItemTable().clone())
             .position(() -> new Vector2i(getPosition()))
             .viewAnchor(() -> this.renderedBy == null ? null : this.renderedBy.getViewAnchor())
-            .state("floating", this::isFloating)
+            .floating(this::isFloating)
             .build();
     @Getter(AccessLevel.PROTECTED)
     @Setter(AccessLevel.PACKAGE)
@@ -62,15 +63,19 @@ public abstract class Component implements Comparable<Component> {
         private final Snapping<ItemTable> items;
         private final Snapping<Vector2i> position;
         private final Snapping<Vector2i> viewAnchor;
+        private final Snapping<Boolean> floating;
         @Getter(AccessLevel.NONE)
         private final Map<String, Snapping<Object>> states;
+        @Accessors(fluent = true)
+        private boolean hasChecked = false;
 
         @Builder
-        public Snapshot(Supplier<CollisionTable> collision, Supplier<ItemTable> items, Supplier<Vector2i> position, Supplier<Vector2i> viewAnchor, @Singular Map<String, Supplier<Object>> states) {
+        public Snapshot(Supplier<CollisionTable> collision, Supplier<ItemTable> items, Supplier<Vector2i> position, Supplier<Vector2i> viewAnchor, Supplier<Boolean> floating, @Singular Map<String, Supplier<Object>> states) {
             this.collision = new Snapping<>(collision);
             this.items = new Snapping<>(items);
             this.position = new Snapping<>(position);
             this.viewAnchor = new Snapping<>(viewAnchor);
+            this.floating = new Snapping<>(floating);
             this.states = states.entrySet().stream().reduce(new HashMap<>(), (i, e) -> {
                 i.put(e.getKey(), new Snapping<>(e.getValue()));
                 return i;
@@ -106,14 +111,17 @@ public abstract class Component implements Comparable<Component> {
                 snapping.setVal(newState);
             }
 
+            this.hasChecked = true;
+
             return changed;
         }
 
         @Data
         @ToString
-        public static class Snapping<T> implements Cloneable {
+        public static final class Snapping<T> implements Cloneable {
 
             @ToString.Exclude
+            @EqualsAndHashCode.Exclude
             private final Supplier<T> supplier;
             private T val = null;
 
@@ -131,6 +139,7 @@ public abstract class Component implements Comparable<Component> {
                     throw new AssertionError();
                 }
             }
+
         }
 
     }
