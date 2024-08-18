@@ -7,9 +7,7 @@ import lombok.*;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector2i;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Supplier;
 
 @Getter
@@ -60,26 +58,30 @@ public abstract class Component implements Comparable<Component> {
     @Getter
     public static class Snapshot {
 
-        private final Supplier<CollisionTable> collision;
-        private final Supplier<ItemTable> items;
-        private final Supplier<Vector2i> position;
-        private final Supplier<Vector2i> viewAnchor;
+        private final Snapping<CollisionTable> collision;
+        private final Snapping<ItemTable> items;
+        private final Snapping<Vector2i> position;
+        private final Snapping<Vector2i> viewAnchor;
         @Getter(AccessLevel.NONE)
-        private final Map<String, Supplier<Object>> states;
-        @Getter(AccessLevel.NONE)
-        private final Map<String, Object> prevStates = new HashMap<>();
+        private final Map<String, Snapping<Object>> states;
 
         @Builder
         public Snapshot(Supplier<CollisionTable> collision, Supplier<ItemTable> items, Supplier<Vector2i> position, Supplier<Vector2i> viewAnchor, @Singular Map<String, Supplier<Object>> states) {
-            this.collision = collision;
-            this.items = items;
-            this.position = position;
-            this.viewAnchor = viewAnchor;
-            this.states = states;
+            this.collision = new Snapping<>(collision);
+            this.items = new Snapping<>(items);
+            this.position = new Snapping<>(position);
+            this.viewAnchor = new Snapping<>(viewAnchor);
+            this.states = states.entrySet().stream().reduce(new HashMap<>(), (i, e) -> {
+                i.put(e.getKey(), new Snapping<>(e.getValue()));
+                return i;
+            }, (a, b) -> {
+                a.putAll(b);
+                return a;
+            });
         }
 
         public void registerToCheck(String id, @NotNull Supplier<Object> stateSupplier) {
-            this.states.put(id, stateSupplier);
+            this.states.put(id, new Snapping<>(stateSupplier));
         }
 
         /**
@@ -88,25 +90,30 @@ public abstract class Component implements Comparable<Component> {
         public boolean collectAndCheckChanged() {
             boolean changed = false;
 
-            final Map<String, Supplier<?>> map = new HashMap<>(this.states);
-            map.putAll(Map.of(
-                    System.currentTimeMillis() + "", this.collision,
-                    System.currentTimeMillis() + "", this.items,
-                    System.currentTimeMillis() + "", this.position,
-                    System.currentTimeMillis() + "", this.viewAnchor
+            final List<Snapping<?>> snappings = new ArrayList<>(this.states.values());
+            snappings.addAll(Arrays.asList(
+                    this.collision,
+                    this.items,
+                    this.position,
+                    this.viewAnchor
             ));
 
-            for (Map.Entry<String, Supplier<?>> entry : map.entrySet()) {
-                final Object oldState = this.prevStates.get(entry.getKey());
-                final Object newState = this.prevStates.compute(
-                        entry.getKey(),
-                        (k, v) -> entry.getValue().get()
-                );
+            for (Snapping<?> snapping : snappings) {
+                final Object oldState = snapping.getVal();
+                final Object newState = snapping.getSupplier().get();
 
                 if (!Objects.equals(oldState, newState)) changed = true;
             }
 
             return changed;
+        }
+
+        @Data
+        public static class Snapping<T> {
+
+            private final Supplier<T> supplier;
+            private T val = null;
+
         }
 
     }
