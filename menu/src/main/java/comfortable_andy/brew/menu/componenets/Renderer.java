@@ -62,86 +62,96 @@ public class Renderer {
 
     public void tryRender(boolean force) {
         if (this.inventory == null) return;
-        // TODO make snapshots actually work
         final Set<Component> rendering;
         if (force) {
-            System.out.println("force");
-            this.inventory.clear();
+            resetCanvas(this.inventory, true);
             rendering = this.components.stream().sorted().collect(Collectors.toCollection(LinkedHashSet::new));
+            for (Component component : rendering) {
+                component.getSnapshot().collectIfNotChecked();
+            }
         } else {
+            resetCanvas(this.inventory, false);
             rendering = new LinkedHashSet<>();
             for (Component component : this.components) {
                 final Component.Snapshot snapshot = component.getSnapshot();
-                final boolean checkedBefore = snapshot.hasChecked();
-                final var itemSnapping = snapshot.getItems().clone();
-                final var posSnapping = snapshot.getPosition().clone();
-                final var floatingSnapping = snapshot.getFloating().clone();
-                final var anchor = snapshot.getViewAnchor().clone();
-                final boolean changed = snapshot.collectAndCheckChanged();
-                if (!checkedBefore) {
+
+                if (!snapshot.hasChecked()) {
+                    // if this component has ever been rendered, this shouldn't be reached
                     rendering.add(component);
                     continue;
                 }
-                if (!changed) continue;
+
+                final var itemSnapping = snapshot.getItems().clone();
+                final var posSnapping = snapshot.getPosition().clone();
+                final var floatingSnapping = snapshot.getFloating().clone();
+                final var anchorSnapping = snapshot.getViewAnchor().clone();
+
+                if (!snapshot.collectAndCheckChanged()) continue;
+
                 final Vector2i oldPos = posSnapping.getVal();
-                if (Objects.equals(true, floatingSnapping.getVal())) {
-                    oldPos.add(anchor.getVal() == null ? getViewAnchor() : anchor.getVal());
-                }
+                if (floatingSnapping.getVal() && anchorSnapping.getVal() != null)
+                    oldPos.add(anchorSnapping.getVal());
                 final Vector2i newPos = snapshot.getPosition().getVal();
-                if (Objects.equals(true, snapshot.getFloating().getVal())) {
-                    newPos.add(getViewAnchor());
-                }
-                final Set<Vector2i> changedPos = new HashSet<>();
+                if (snapshot.getFloating().getVal() && snapshot.getViewAnchor().getVal() != null)
+                    newPos.add(snapshot.getViewAnchor().getVal());
+
                 final boolean itemsChanged = !itemSnapping.equals(snapshot.getItems());
-                final boolean anchorChanged = !Objects.equals(anchor.getVal(), getViewAnchor());
-                System.out.println(itemsChanged + " || " + anchorChanged);
-                System.out.println(itemSnapping.getVal() + " -> " + snapshot.getItems().getVal());
-                System.out.println(anchor.getVal() + " -> " + snapshot.getViewAnchor().getVal() + " or " + getViewAnchor());
+                final boolean anchorChanged = !Objects.equals(anchorSnapping.getVal(), snapshot.getViewAnchor().getVal());
+
                 if (itemsChanged || anchorChanged) {
-                    System.out.println("updating item");
+                    final Set<Vector2i> changedPos = new HashSet<>();
+
+                    // setting screen space to false because the positions
+                    // has already been converted to world space (if needed)
                     for (Table.Item<ItemStack> item : itemSnapping.getVal()) {
                         final Vector2i relPos = new Vector2i(item.x(), item.y());
                         final Vector2i actualPos = relPos.add(oldPos, new Vector2i());
-                        rendering.addAll(componentsAt(actualPos.sub(getViewAnchor(), new Vector2i())).keySet());
+                        rendering.addAll(componentsAt(actualPos, false, false).keySet());
                         changedPos.add(actualPos);
                     }
                     for (Table.Item<ItemStack> item : snapshot.getItems().getVal()) {
                         final Vector2i relPos = new Vector2i(item.x(), item.y());
                         final Vector2i actualPos = relPos.add(newPos, new Vector2i());
-                        rendering.addAll(componentsAt(actualPos.sub(getViewAnchor(), new Vector2i())).keySet());
+                        rendering.addAll(componentsAt(actualPos, false, false).keySet());
                         changedPos.add(actualPos);
-                    }
-                    for (Vector2i pos : changedPos) {
-                        int i = this.translateToIndex(this.inventory, pos, false);
-                        if (i != -1)
-                            this.inventory.setItem(i, null);
                     }
                 }
             }
         }
-        System.out.println("rendering [" + rendering.stream().map(c -> c.getClass().getSimpleName()).collect(Collectors.joining(", ")) + "]");
-        if (force) rendering.forEach(c -> this.renderComponent(this.inventory, c));
+        rendering.forEach(c -> this.renderComponent(this.inventory, c));
+    }
+
+    private void resetCanvas(Inventory inventory, boolean hard) {
+        if (hard) {
+            inventory.clear();
+        } else {
+            for (int i = 0; i < inventory.getSize(); i++) {
+                if (componentsAt(translateToScreenSpaceVec(inventory, i), true, false).isEmpty()) {
+                    inventory.setItem(i, null);
+                }
+            }
+        }
     }
 
     private void renderComponent(@NotNull final Inventory inventory, @NotNull Component component) {
         final Vector2i pos = component.getPosition();
         for (Table.Item<ItemStack> item : component.getItemTable()) {
-            if (item.value() == null) continue;
+            ItemStack stack = item.value();
+            if (stack == null) continue;
             final int index;
 
             if ((index = translateToIndex(
                     inventory,
                     new Vector2i(item.x() + pos.x, item.y() + pos.y),
                     component.isFloating()
-            )) >= inventory.getSize() || index < 0)
-                continue;
-            inventory.setItem(index, item.value());
+            )) == -1) continue;
+            inventory.setItem(index, stack);
         }
     }
 
     /**
-     * @param screenPosition the xy screen position to check
-     * @return a map of components that contain the position, with larger z index appearing earlier in the list AND the {@link Renderer#clickedRelativePosition(Component, Vector2i)} of the component
+     * @param position the xy screen position to check
+     * @return a map of components that contain the position, with larger z index appearing earlier in the list AND the relative position to the component
      */
     public Map<Component, Vector2i> componentsAt(@NotNull Vector2i position, boolean convertToWorldSpace, boolean checkCollision) {
         // convert everything to world space
