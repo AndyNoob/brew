@@ -1,4 +1,4 @@
-# Brew (menu)
+# Brew (menu) [![wakatime](https://wakatime.com/badge/user/018ce26d-cc0f-41ad-a476-75b8f5dee1cb/project/6d29ce59-c61e-4576-82c2-fb9f15c3889b.svg)](https://wakatime.com/badge/user/018ce26d-cc0f-41ad-a476-75b8f5dee1cb/project/6d29ce59-c61e-4576-82c2-fb9f15c3889b)
 This library was created because I felt that making inventory menus with Bukkit is pretty messy. In particular, things such as pagination, click detection, and inventory switching. This library attempts to tackle these problems.
 
 
