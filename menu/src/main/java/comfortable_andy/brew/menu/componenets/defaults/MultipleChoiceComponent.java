@@ -53,7 +53,7 @@ public abstract class MultipleChoiceComponent extends InventorySwitchingComponen
         final Renderer renderer = this.menu.getRenderer();
         renderer.setInventory(this.choiceInv);
         if (component != null)
-            component.getPosition().set(renderer.translateToVec(this.choiceInv, invSize - 4 - 1));
+            component.getPosition().set(renderer.translateToScreenSpaceVec(this.choiceInv, invSize - 4 - 1));
         generateChoiceButtons();
         renderer.render();
     }

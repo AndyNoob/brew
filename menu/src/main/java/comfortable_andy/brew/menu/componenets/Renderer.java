@@ -187,7 +187,7 @@ public class Renderer {
         return finalPosition.y() * 9 + finalPosition.x();
     }
 
-    public Vector2i translateToVec(Inventory inventory, int i) {
+    public Vector2i translateToScreenSpaceVec(Inventory inventory, int i) {
         assert inventory.getType() == InventoryType.CHEST;
         final int size = inventory.getSize();
         final int height = NumberConversions.ceil(size / 9f);

@@ -105,7 +105,7 @@ public class Menu extends Displaying {
     public boolean handleClick(Inventory inventory, MenuAction.ActionType type, @Nullable MenuAction.ActionModifier modifier, int slot, HumanEntity whoClicked) {
         final MenuAction.ActionCriteria criteria = new MenuAction.ActionCriteria(type, modifier);
         final Vector2i screenPosition = this.renderer
-                .translateToVec(inventory, slot);
+                .translateToScreenSpaceVec(inventory, slot);
         boolean ran = false;
         boolean cancel = false;
         for (Map.Entry<Component, Vector2i> e : this.renderer.componentsAt(screenPosition).entrySet()) {
