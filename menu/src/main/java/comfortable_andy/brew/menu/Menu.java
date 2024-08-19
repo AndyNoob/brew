@@ -12,6 +12,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2i;
@@ -55,7 +56,21 @@ public class Menu extends Displaying {
 
     public void handleClick(InventoryClickEvent event) {
         if (this.renderer.getInventory() == null) return;
-        if (event.getClickedInventory() != this.renderer.getInventory()) return;
+        if (event.getClickedInventory() != this.renderer.getInventory()) {
+            switch (event.getAction()) {
+                case MOVE_TO_OTHER_INVENTORY -> event.setCancelled(true);
+                case COLLECT_TO_CURSOR -> {
+                    final ItemStack collecting = event.getCursor();
+                    for (ItemStack stack : event.getView().getTopInventory()) {
+                        if (collecting.isSimilar(stack)) {
+                            event.setCancelled(true);
+                            break;
+                        }
+                    }
+                }
+            }
+            return;
+        }
         MenuAction.ActionModifier modifier = MenuAction.ActionModifier.NONE;
         final MenuAction.ActionType type = switch (event.getClick()) {
             case DROP, LEFT, SWAP_OFFHAND, NUMBER_KEY -> MenuAction.ActionType.LEFT;
