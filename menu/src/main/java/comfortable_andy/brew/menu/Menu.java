@@ -2,9 +2,8 @@ package comfortable_andy.brew.menu;
 
 import comfortable_andy.brew.menu.actions.MenuAction;
 import comfortable_andy.brew.menu.componenets.Component;
-import lombok.EqualsAndHashCode;
-
 import comfortable_andy.brew.menu.componenets.Renderer;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -108,7 +107,7 @@ public class Menu extends Displaying {
                 .translateToScreenSpaceVec(inventory, slot);
         boolean ran = false;
         boolean cancel = false;
-        for (Map.Entry<Component, Vector2i> e : this.renderer.componentsAt(screenPosition).entrySet()) {
+        for (Map.Entry<Component, Vector2i> e : this.renderer.componentsAt(screenPosition, true, true).entrySet()) {
             Component component = e.getKey();
             for (var actionEntry : component.getActions().entrySet()) {
                 if (actionEntry.getValue().equals(criteria)) {

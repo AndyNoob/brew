@@ -143,12 +143,24 @@ public class Renderer {
      * @param screenPosition the xy screen position to check
      * @return a map of components that contain the position, with larger z index appearing earlier in the list AND the {@link Renderer#clickedRelativePosition(Component, Vector2i)} of the component
      */
-    public Map<Component, Vector2i> componentsAt(@NotNull Vector2i screenPosition) {
+    public Map<Component, Vector2i> componentsAt(@NotNull Vector2i position, boolean convertToWorldSpace, boolean checkCollision) {
+        // convert everything to world space
+        if (convertToWorldSpace) {
+            position = position.add(getViewAnchor(), new Vector2i());
+        }
+        @NotNull Vector2i finalPosition = position;
         return this.components.stream()
                 .sorted(Comparator.reverseOrder())
                 .reduce(new LinkedHashMap<>(), (map, component) -> {
-                    Vector2i relative = clickedRelativePosition(component, screenPosition);
-                    if (relative != null) map.put(component, relative);
+                    final Vector2i componentPosition = new Vector2i(component.getPosition());
+                    if (component.isFloating()) componentPosition.add(getViewAnchor());
+                    final Table<?, ?> table = checkCollision ? component.getCollisionTable() : component.getItemTable();
+                    for (Table.Item<?> item : table) {
+                        Vector2i relPos = new Vector2i(item.x(), item.y());
+                        if (componentPosition.add(relPos, new Vector2i()).equals(finalPosition)) {
+                            map.put(component, relPos);
+                        }
+                    }
                     return map;
                 }, (a, b) -> {
                     a.putAll(b);
@@ -156,28 +168,13 @@ public class Renderer {
                 });
     }
 
-    /**
-     * @return relative clicked position from the component
-     */
-    @Nullable
-    public Vector2i clickedRelativePosition(@NotNull Component component, @NotNull Vector2i screenPosition) {
-        final Vector2i componentPosition = component.getPosition();
-        final var collisionTable = component.getCollisionTable();
-
-        final Vector2i clickPosition = component.isFloating() ? screenPosition : getViewAnchor().add(screenPosition, new Vector2i());
-        final Vector2i clickPosComponentSpace = new Vector2i(clickPosition)
-                .sub(componentPosition);
-
-        return Objects.equals(collisionTable.get(clickPosComponentSpace.x, clickPosComponentSpace.y), true) ? clickPosComponentSpace : null;
-    }
-
     @Range(from = -1, to = 53)
-    private int translateToIndex(Inventory inventory, @NotNull Vector2i position, boolean isLocalSpace) {
+    private int translateToIndex(Inventory inventory, @NotNull Vector2i position, boolean isPositionScreenSpace) {
         assert inventory.getType() == InventoryType.CHEST;
         final int size = inventory.getSize();
         final int height = NumberConversions.ceil(size / 9f);
         final Vector2i rowColumn = getInventoryCenterRowColumn(height);
-        final Vector2i offset = isLocalSpace ? position : position.sub(this.worldSpaceAnchor, new Vector2i());
+        final Vector2i offset = isPositionScreenSpace ? position : position.sub(this.worldSpaceAnchor, new Vector2i());
         offset.y *= -1;
         offset.y *= Direction.UP.get().y;
         offset.x *= Direction.RIGHT.get().x;
