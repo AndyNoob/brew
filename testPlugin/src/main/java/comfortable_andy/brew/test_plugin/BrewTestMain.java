@@ -99,8 +99,8 @@ public class BrewTestMain extends JavaPlugin implements Listener {
                                 if (!(sender instanceof HumanEntity entity)) return 0;
                                 var menu = menus.compute(entity, (k, v) -> {
                                     Menu m = new Menu("ew", "32", "32432");
-                                    m.addComponent(new SimpleButtonComponent(new Vector2i(-4, 3), 1, 1, new ItemStack(Material.BEACON), he -> {}));
-                                    m.addComponent(new SimpleButtonComponent(new Vector2i(3, -2), 3, 1, new ItemStack(Material.TORCH), he -> {}));
+                                    m.addComponent(new SimpleButtonComponent(new Vector2i(-4, 3), 1, 1, new ItemStack(Material.BEACON), he -> getLogger().info("beaconnn")));
+                                    m.addComponent(new SimpleButtonComponent(new Vector2i(3, -2), 3, 1, new ItemStack(Material.TORCH), he -> getLogger().info("torchhh")));
                                     m.addComponent(new ScrollComponent(
                                             new Vector2i(0, -2),
                                             IntegerRange.of(1, 10),
