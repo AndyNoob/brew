@@ -20,7 +20,7 @@ To get started, add the library to as a dependency.
     <dependency>
         <groupId>com.github.AndyNoob</groupId>
         <artifactId>brew</artifactId>
-        <version>cc8f83362d</version>
+        <version>version from the jitpack badge</version>
     </dependency>
     <!--...-->
 </dependencies>
