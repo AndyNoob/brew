@@ -1,2 +1,5 @@
 jdk:
   - openjdk21
+install:
+  - echo 'Running custom install command.'
+  - ./gradlew publishToMavenLocal
