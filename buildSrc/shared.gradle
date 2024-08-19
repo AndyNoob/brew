@@ -19,6 +19,14 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok:1.18.34'
 }
 
+jar {
+    archiveBaseName.set('brew-' + project.name)
+}
+
+tasks.assemble {
+    dependsOn(tasks.reobfJar)
+}
+
 def targetJavaVersion = 21
 java {
     def javaVersion = JavaVersion.toVersion(targetJavaVersion)

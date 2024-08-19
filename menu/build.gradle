@@ -9,11 +9,13 @@ version = '1.0.0'
 
 apply from: rootProject.file('buildSrc/shared.gradle')
 
+tasks.publishToMavenLocal.dependsOn(tasks.assemble)
+
 publishing {
     publications {
         maven(MavenPublication) {
-            groupId = group
-            artifactId = 'brew-' + rootProject.name
+            groupId = this.group
+            artifactId = this.name
             version = this.version
             from components.java
         }

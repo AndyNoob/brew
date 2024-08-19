@@ -1,2 +1,3 @@
 rootProject.name = 'brew'
 include(':menu', ':testPlugin')
+rootProject.getChildren().forEach { it.name = rootProject.name + '-' + it.name }

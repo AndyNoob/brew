@@ -17,7 +17,7 @@ repositories {
 
 dependencies {
     compileOnly 'com.comphenix.protocol:ProtocolLib:5.1.0'
-    implementation rootProject.project(':menu')
+    implementation rootProject.project(':brew-menu')
 }
 
 apply from: rootProject.file('buildSrc/shared.gradle')
