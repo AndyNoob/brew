@@ -29,11 +29,12 @@ public abstract class Component implements Comparable<Component> {
     private final @NotNull Vector2i position;
     private final Map<MenuAction, MenuAction.ActionCriteria> actions = new HashMap<>();
 
+    @ToString.Exclude
     private final Snapshot snapshot = Snapshot.builder()
             .collision(() -> getCollisionTable().clone())
             .items(() -> getItemTable().clone())
             .position(() -> new Vector2i(getPosition()))
-            .viewAnchor(() -> this.renderedBy == null ? null : this.renderedBy.getViewAnchor())
+            .viewAnchor(() -> this.renderedBy == null || this.floating ? null : this.renderedBy.getViewAnchor())
             .floating(this::isFloating)
             .build();
     @Getter(AccessLevel.PROTECTED)
@@ -91,19 +92,35 @@ public abstract class Component implements Comparable<Component> {
             this.states.put(id, new Snapping<>(stateSupplier));
         }
 
+        @NotNull
+        private List<Snapping<?>> getAllSnappings() {
+            final List<Snapping<?>> snappings = new ArrayList<>(this.states.values());
+            snappings.addAll(Arrays.asList(
+                    this.collision,
+                    this.items,
+                    this.position,
+                    this.viewAnchor,
+                    this.floating
+            ));
+            return snappings;
+        }
+
+        public void collectIfNotChecked() {
+            if (hasChecked()) return;
+            final List<Snapping<?>> snappings = getAllSnappings();
+            for (Snapping<?> snapping : snappings) {
+                snapping.setVal(snapping.getSupplier().get());
+            }
+            this.hasChecked = true;
+        }
+
         /**
          * @return true if changed; false otherwise
          */
         public boolean collectAndCheckChanged() {
             boolean changed = false;
 
-            final List<Snapping<?>> snappings = new ArrayList<>(this.states.values());
-            snappings.addAll(Arrays.asList(
-                    this.collision,
-                    this.items,
-                    this.position,
-                    this.viewAnchor
-            ));
+            final List<Snapping<?>> snappings = getAllSnappings();
 
             for (Snapping<?> snapping : snappings) {
                 final Object oldState = snapping.getVal();
@@ -114,7 +131,6 @@ public abstract class Component implements Comparable<Component> {
             }
 
             this.hasChecked = true;
-
             return changed;
         }
 
