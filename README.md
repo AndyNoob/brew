@@ -1,7 +1,11 @@
 # Brew (menu)
 This library was created because I felt that making inventory menus with Bukkit is pretty messy. In particular, things such as pagination, click detection, and inventory switching. This library attempts to tackle these problems.
 
-<img alt="pagination" src="https://github.com/user-attachments/assets/4338d072-2def-4dea-a9cb-de4ece47ad77"/>
+
+
+https://github.com/user-attachments/assets/1b735791-81e6-4646-a630-28ce10cf9dc5
+
+
 
 ## Adding to your dependencies [![](https://jitpack.io/v/AndyNoob/brew.svg)](https://jitpack.io/#AndyNoob/brew)
 To get started, add the library to as a dependency.
