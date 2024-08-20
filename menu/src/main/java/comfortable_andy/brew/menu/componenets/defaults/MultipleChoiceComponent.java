@@ -106,6 +106,7 @@ public abstract class MultipleChoiceComponent extends InventorySwitchingComponen
                 .forward(new ItemStack(Material.ARROW))
                 .back(new ItemStack(Material.ARROW))
                 .callback((a, b) -> {})
+                .hideItemIfPaginating(true)
                 .build();
     }
 
