@@ -10,8 +10,8 @@ import comfortable_andy.brew.menu.Menu;
 import comfortable_andy.brew.menu.componenets.Renderer;
 import comfortable_andy.brew.menu.componenets.defaults.ScrollComponent;
 import comfortable_andy.brew.menu.componenets.defaults.SimpleButtonComponent;
+import comfortable_andy.brew.menu.componenets.defaults.SimpleMultipleChoiceComponent;
 import comfortable_andy.brew.menu.componenets.defaults.SimpleTextFieldComponent;
-import comfortable_andy.brew.test_plugin.components.SimpleMultipleChoiceComponent;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
@@ -84,7 +84,16 @@ public class BrewTestMain extends JavaPlugin implements Listener {
                                 if (!(sender instanceof HumanEntity entity)) return 0;
                                 var menu = menus.compute(entity, (k, v) -> {
                                     Menu m = new Menu("yo ma", "bruh", "choices");
-                                    m.addComponent(new SimpleMultipleChoiceComponent(this, new Vector2i(), new ItemStack(Material.PAPER), CommandSender::sendMessage));
+
+                                    m.addComponent(SimpleMultipleChoiceComponent
+                                            .builder()
+                                            .plugin(this)
+                                            .position(new Vector2i())
+                                            .item(new ItemStack(Material.PAPER))
+                                            .callback(CommandSender::sendMessage)
+                                            .choices(SimpleMultipleChoiceComponent.randomChoices())
+                                            .build()
+                                    );
                                     return m;
                                 });
                                 openInv(entity, menu);

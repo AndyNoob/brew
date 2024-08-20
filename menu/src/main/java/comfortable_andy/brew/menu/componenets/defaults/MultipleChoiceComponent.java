@@ -16,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2i;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
@@ -27,12 +28,14 @@ public abstract class MultipleChoiceComponent extends InventorySwitchingComponen
     protected final Inventory choiceInv;
     protected final Menu menu;
     protected final BiConsumer<HumanEntity, String> callback;
+    protected final LinkedHashMap<String, Supplier<ItemStack>> choices;
     protected int rows;
 
-    public MultipleChoiceComponent(@NotNull JavaPlugin plugin, @NotNull Vector2i position, BiConsumer<HumanEntity, String> callback) {
+    public MultipleChoiceComponent(@NotNull JavaPlugin plugin, @NotNull Vector2i position, BiConsumer<HumanEntity, String> callback, LinkedHashMap<String, Supplier<ItemStack>> choices) {
         super(plugin, position);
+        this.choices = choices;
         this.callback = callback;
-        final int choiceSize = choices().size();
+        final int choiceSize = choices.size();
         this.rows = NumberConversions.ceil(choiceSize / 9f);
         this.menu = new Menu(
                 "" + hashCode(),
@@ -60,12 +63,10 @@ public abstract class MultipleChoiceComponent extends InventorySwitchingComponen
 
     protected abstract String displayName();
 
-    protected abstract Map<String, Supplier<ItemStack>> choices();
-
     protected void generateChoiceButtons() {
         int i = 0;
 
-        for (Map.Entry<String, Supplier<ItemStack>> entry : choices().entrySet()) {
+        for (Map.Entry<String, Supplier<ItemStack>> entry : this.choices.entrySet()) {
             final int horizontalOffset = i / MAX_CHOICES_PAGE;
             final int x = i % 9 - 4 + 9 * horizontalOffset;
             System.out.println(i % MAX_CHOICES_PAGE);

@@ -1,7 +1,7 @@
-package comfortable_andy.brew.test_plugin.components;
+package comfortable_andy.brew.menu.componenets.defaults;
 
 import comfortable_andy.brew.menu.actions.MenuAction;
-import comfortable_andy.brew.menu.componenets.defaults.MultipleChoiceComponent;
+import lombok.Builder;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.ItemStack;
@@ -15,8 +15,9 @@ import java.util.function.Supplier;
 
 public class SimpleMultipleChoiceComponent extends MultipleChoiceComponent {
 
-    public SimpleMultipleChoiceComponent(@NotNull JavaPlugin plugin, @NotNull Vector2i position, ItemStack item, BiConsumer<HumanEntity, String> callback) {
-        super(plugin, position, callback);
+    @Builder
+    public SimpleMultipleChoiceComponent(@NotNull JavaPlugin plugin, @NotNull Vector2i position, ItemStack item, BiConsumer<HumanEntity, String> callback, LinkedHashMap<String, Supplier<ItemStack>> choices) {
+        super(plugin, position, callback, choices);
         getItemTable().set(0, 0, item);
         getCollisionTable().set(0, 0);
         getActions().put((h, r) -> {
@@ -30,8 +31,8 @@ public class SimpleMultipleChoiceComponent extends MultipleChoiceComponent {
         return "yo mama";
     }
 
-    @Override
-    protected Map<String, Supplier<ItemStack>> choices() {
+    @NotNull
+    public static LinkedHashMap<String, Supplier<ItemStack>> randomChoices() {
         final List<Material> itemMats = new ArrayList<>(Arrays.stream(Material.values())
                 .filter(Material::isItem)
                 .filter(material -> !material.isLegacy())
