@@ -27,7 +27,7 @@ public class ScrollComponent extends AnchorShiftingComponent {
     private final BiConsumer<@Nullable Integer, @Nullable Integer> callback;
 
     @Builder
-    public ScrollComponent(Vector2i pos, @Nullable IntegerRange range, boolean isHorizontal, int moveAmount, ItemStack back, ItemStack forward, BiConsumer<@Nullable Integer, @Nullable Integer> callback) {
+    public ScrollComponent(Vector2i pos, @Nullable IntegerRange range, boolean isHorizontal, int moveAmount, ItemStack back, ItemStack forward, boolean hideItemIfPaginating, BiConsumer<@Nullable Integer, @Nullable Integer> callback) {
         super(pos, true);
         this.range = range;
         this.moveAmount = moveAmount;
@@ -42,10 +42,36 @@ public class ScrollComponent extends AnchorShiftingComponent {
         getItemTable().set(forwardPos.x, forwardPos.y, forward);
         getCollisionTable().set(backPos.x, backPos.y);
         getCollisionTable().set(forwardPos.x, forwardPos.y);
+        updateTable(forwardPos, backPos, forward, back);
         getActions().put((e, rel) -> {
-            shift(rel.equals(forwardPos));
+            final boolean isForward = rel.equals(forwardPos);
+            shift(isForward);
+            updateTable(forwardPos, backPos, forward, back);
             return true;
         }, MenuAction.ActionCriteria.builder().type(MenuAction.ActionType.LEFT).build());
+    }
+
+    private void updateTable(Vector2i forwardPos, Vector2i backPos, ItemStack forward, ItemStack back) {
+        if (this.range != null) {
+            System.out.println(page);
+            System.out.println(range);
+            System.out.println(range.contains(page + 1));
+            System.out.println(range.contains(page - 1));
+            if (this.range.contains(this.page - 1)) {
+                System.out.println("set back");
+                getItemTable().set(backPos.x, backPos.y, back);
+                System.out.println(getSnapshot().getItems().getVal());
+                System.out.println(getItemTable());
+            }
+            else getItemTable().remove(backPos.x, backPos.y);
+            if (this.range.contains(this.page + 1)) {
+                System.out.println("set forward");
+                getItemTable().set(forwardPos.x, forwardPos.y, forward);
+                System.out.println(getSnapshot().getItems().getVal().hashCode());
+                System.out.println(getItemTable().hashCode());
+            }
+            else getItemTable().remove(forwardPos.x, forwardPos.y);
+        }
     }
 
     @Override

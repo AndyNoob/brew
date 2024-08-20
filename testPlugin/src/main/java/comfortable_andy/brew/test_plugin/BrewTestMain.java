@@ -117,6 +117,7 @@ public class BrewTestMain extends JavaPlugin implements Listener {
                                             1,
                                             new ItemStack(Material.DIAMOND),
                                             new ItemStack(Material.DIAMOND),
+                                            true,
                                             (a, b) -> m.getRenderer().render()
                                     ));
                                     return m;

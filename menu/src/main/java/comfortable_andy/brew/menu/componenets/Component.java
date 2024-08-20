@@ -5,7 +5,9 @@ import comfortable_andy.brew.menu.componenets.tables.CollisionTable;
 import comfortable_andy.brew.menu.componenets.tables.ItemTable;
 import lombok.*;
 import lombok.experimental.Accessors;
+import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Range;
 import org.joml.Vector2i;
 
 import java.lang.reflect.Method;
@@ -70,7 +72,8 @@ public abstract class Component implements Comparable<Component> {
         @Getter(AccessLevel.NONE)
         private final Map<String, Snapping<Object>> states;
         @Accessors(fluent = true)
-        private boolean hasChecked = false;
+        @Range(from = -1, to = Long.MAX_VALUE)
+        private int lastSnapTick = -1;
 
         @Builder
         public Snapshot(Supplier<CollisionTable> collision, Supplier<ItemTable> items, Supplier<Vector2i> position, Supplier<Vector2i> viewAnchor, Supplier<Boolean> floating, @Singular Map<String, Supplier<Object>> states) {
@@ -106,12 +109,12 @@ public abstract class Component implements Comparable<Component> {
         }
 
         public void collectIfNotChecked() {
-            if (hasChecked()) return;
+            if (lastSnapTick() != -1) return;
             final List<Snapping<?>> snappings = getAllSnappings();
             for (Snapping<?> snapping : snappings) {
                 snapping.setVal(snapping.getSupplier().get());
             }
-            this.hasChecked = true;
+            this.lastSnapTick = Bukkit.getCurrentTick();
         }
 
         /**
@@ -130,7 +133,7 @@ public abstract class Component implements Comparable<Component> {
                 snapping.setVal(newState);
             }
 
-            this.hasChecked = true;
+            this.lastSnapTick = Bukkit.getCurrentTick();
             return changed;
         }
 

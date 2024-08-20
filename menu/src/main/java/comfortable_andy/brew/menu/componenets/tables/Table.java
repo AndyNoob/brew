@@ -42,6 +42,11 @@ public abstract class Table<T, Self extends Table<T, Self>> implements Iterable<
         return this.table.put(new Vector2i(x, y), value);
     }
 
+    @Nullable
+    public T remove(int x, int y) {
+        return this.table.remove(new Vector2i(x, y));
+    }
+
     public void set(IntegerRange xRange, IntegerRange yRange, @Nullable T value) {
         IntStream.range(xRange.getMinimum(), xRange.getMaximum() + 1).forEachOrdered(x -> {
             IntStream.range(yRange.getMinimum(), yRange.getMaximum() + 1)

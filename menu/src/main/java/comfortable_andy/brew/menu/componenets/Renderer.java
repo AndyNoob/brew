@@ -3,6 +3,7 @@ package comfortable_andy.brew.menu.componenets;
 import comfortable_andy.brew.menu.componenets.tables.Table;
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.Bukkit;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -75,7 +76,7 @@ public class Renderer {
             for (Component component : this.components) {
                 final Component.Snapshot snapshot = component.getSnapshot();
 
-                if (!snapshot.hasChecked()) {
+                if (snapshot.lastSnapTick() == -1) {
                     // if this component has ever been rendered, this shouldn't be reached
                     rendering.add(component);
                     continue;
@@ -86,7 +87,13 @@ public class Renderer {
                 final var floatingSnapping = snapshot.getFloating().clone();
                 final var anchorSnapping = snapshot.getViewAnchor().clone();
 
-                if (!snapshot.collectAndCheckChanged()) continue;
+                if (!snapshot.collectAndCheckChanged()) {
+                    System.out.println("nothing changed");
+                    System.out.println(itemSnapping.getVal());
+                    System.out.println(snapshot.getItems().getVal());
+                    System.out.println(Bukkit.getCurrentTick());
+                    continue;
+                }
 
                 final Vector2i oldPos = posSnapping.getVal();
                 if (floatingSnapping.getVal() && anchorSnapping.getVal() != null)
@@ -99,21 +106,17 @@ public class Renderer {
                 final boolean anchorChanged = !Objects.equals(anchorSnapping.getVal(), snapshot.getViewAnchor().getVal());
 
                 if (itemsChanged || anchorChanged) {
-                    final Set<Vector2i> changedPos = new HashSet<>();
-
                     // setting screen space to false because the positions
                     // has already been converted to world space (if needed)
                     for (Table.Item<ItemStack> item : itemSnapping.getVal()) {
                         final Vector2i relPos = new Vector2i(item.x(), item.y());
                         final Vector2i actualPos = relPos.add(oldPos, new Vector2i());
                         rendering.addAll(componentsAt(actualPos, false, false).keySet());
-                        changedPos.add(actualPos);
                     }
                     for (Table.Item<ItemStack> item : snapshot.getItems().getVal()) {
                         final Vector2i relPos = new Vector2i(item.x(), item.y());
                         final Vector2i actualPos = relPos.add(newPos, new Vector2i());
                         rendering.addAll(componentsAt(actualPos, false, false).keySet());
-                        changedPos.add(actualPos);
                     }
                 }
             }
