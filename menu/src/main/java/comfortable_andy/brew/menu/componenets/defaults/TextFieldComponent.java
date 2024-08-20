@@ -3,6 +3,7 @@ package comfortable_andy.brew.menu.componenets.defaults;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.PrepareAnvilEvent;
 import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.Inventory;
@@ -51,6 +52,16 @@ public abstract class TextFieldComponent extends InventorySwitchingComponent<Anv
                     Objects.requireNonNullElse(str, "")
             );
             close(e.getWhoClicked());
+        }
+    }
+
+    @Override
+    protected void handleDrag(InventoryDragEvent e) {
+        for (Integer rawSlot : e.getRawSlots()) {
+            if (e.getView().getInventory(rawSlot) == this.openInv.get(e.getWhoClicked())) {
+                e.setCancelled(true);
+                return;
+            }
         }
     }
 

@@ -37,7 +37,7 @@ public abstract class InventorySwitchingComponent<Inv extends Inventory> extends
         this.plugin = plugin;
         this.onClose = makeListener(plugin, (l, e) -> handleClose((InventoryCloseEvent) e));
         this.onClick = makeListener(plugin, (l, e) -> handleClick((InventoryClickEvent) e));
-        this.onDrag = makeListener(plugin, (l, e) -> ((InventoryDragEvent) e).setCancelled(true));
+        this.onDrag = makeListener(plugin, (l, e) -> handleDrag((InventoryDragEvent) e));
         InventoryClickEvent.getHandlerList().register(this.onClick);
         InventoryCloseEvent.getHandlerList().register(this.onClose);
         InventoryDragEvent.getHandlerList().register(this.onDrag);
@@ -53,6 +53,8 @@ public abstract class InventorySwitchingComponent<Inv extends Inventory> extends
     }
 
     protected abstract void handleClick(InventoryClickEvent e);
+
+    protected abstract void handleDrag(InventoryDragEvent e);
 
     protected abstract Inv getInventoryFor(HumanEntity entity);
 

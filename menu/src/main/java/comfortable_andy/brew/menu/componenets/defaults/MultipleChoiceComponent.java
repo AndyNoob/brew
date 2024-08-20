@@ -8,6 +8,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -87,6 +88,11 @@ public abstract class MultipleChoiceComponent extends InventorySwitchingComponen
 
     @Override
     protected void handleClick(InventoryClickEvent e) {
+        this.menu.handleClick(e);
+    }
+
+    @Override
+    protected void handleDrag(InventoryDragEvent e) {
         this.menu.handleClick(e);
     }
 
