@@ -20,7 +20,7 @@ import java.util.stream.IntStream;
 @ToString
 public abstract class Table<T, Self extends Table<T, Self>> implements Iterable<Table.Item<T>>, Cloneable {
 
-    private final Map<Vector2i, T> table = new HashMap<>();
+    private Map<Vector2i, T> table = new HashMap<>();
 
     @Nullable
     protected T defaultValue() {
@@ -81,11 +81,28 @@ public abstract class Table<T, Self extends Table<T, Self>> implements Iterable<
     public Self clone() {
         try {
             final Self clone = (Self) super.clone();
-            ((Table<T, Self>) clone).table.replaceAll((v, t) -> clone(t));
+            final var casted = ((Table<T, Self>) clone);
+            casted.table = new HashMap<>(casted.table);
+            casted.table.replaceAll((v, t) -> clone(t));
             return clone;
         } catch (CloneNotSupportedException e) {
             throw new AssertionError();
         }
+    }
+
+    @Override
+    public final int hashCode() {
+        return super.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Table<?, ?> other = (Table<?, ?>) o;
+
+        return table.equals(other.table);
     }
 
     public record Item<T>(int x, int y, @Nullable T value) {
