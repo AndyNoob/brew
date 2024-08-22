@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.ToString;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
@@ -15,6 +16,7 @@ import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Range;
 import org.joml.Vector2i;
 
 import java.util.ArrayList;
@@ -57,7 +59,10 @@ public class Menu extends Displaying {
         if (this.renderer.getInventory() == null) return;
         if (event.getClickedInventory() != this.renderer.getInventory()) {
             switch (event.getAction()) {
-                case MOVE_TO_OTHER_INVENTORY -> event.setCancelled(true);
+                case MOVE_TO_OTHER_INVENTORY -> {
+                    handleMoveItems(this.renderer.getInventory(), event.getWhoClicked(), event.getCurrentItem(), -1);
+                    event.setCancelled(true);
+                }
                 case COLLECT_TO_CURSOR -> {
                     final ItemStack collecting = event.getCursor();
                     for (ItemStack stack : event.getView().getTopInventory()) {
@@ -70,9 +75,25 @@ public class Menu extends Displaying {
             }
             return;
         }
+        ItemStack moving = null;
+        if (event.getAction().name().contains("PLACE")) {
+            moving = event.getCursor();
+        } else if (event.getClick() == ClickType.NUMBER_KEY) {
+            moving = event.getView().getBottomInventory().getItem(event.getHotbarButton());
+        }
+        if (moving != null &&
+                handleMoveItems(
+                        this.renderer.getInventory(),
+                        event.getWhoClicked(),
+                        moving,
+                        event.getSlot()
+                )) {
+            event.setCancelled(true);
+            return;
+        }
         MenuAction.ActionModifier modifier = MenuAction.ActionModifier.NONE;
         final MenuAction.ActionType type = switch (event.getClick()) {
-            case DROP, LEFT, SWAP_OFFHAND, NUMBER_KEY -> MenuAction.ActionType.LEFT;
+            case DROP, LEFT, SWAP_OFFHAND -> MenuAction.ActionType.LEFT;
             case DOUBLE_CLICK -> {
                 modifier = MenuAction.ActionModifier.DOUBLE;
                 yield MenuAction.ActionType.LEFT;
@@ -131,6 +152,10 @@ public class Menu extends Displaying {
             }
         }
         return !ran || cancel;
+    }
+
+    public boolean handleMoveItems(Inventory inventory, HumanEntity who, ItemStack item, @Range(from = -1, to = 53) int destination) {
+        return false;
     }
 
 }
