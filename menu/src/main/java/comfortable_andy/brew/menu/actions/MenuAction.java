@@ -19,7 +19,7 @@ public interface MenuAction {
 
             ActionCriteria criteria = (ActionCriteria) o;
 
-            if (type != criteria.type) return false;
+            if (type != ActionType.ANY && type != criteria.type) return false;
             return modifier == null || modifier == criteria.modifier;
         }
 
@@ -34,7 +34,8 @@ public interface MenuAction {
     enum ActionType {
         LEFT,
         RIGHT,
-        MIDDLE
+        MIDDLE,
+        ANY
     }
 
     enum ActionModifier {

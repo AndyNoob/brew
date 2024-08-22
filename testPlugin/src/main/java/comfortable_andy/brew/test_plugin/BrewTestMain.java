@@ -8,10 +8,7 @@ import com.comphenix.protocol.events.PacketEvent;
 import com.mojang.brigadier.Command;
 import comfortable_andy.brew.menu.Menu;
 import comfortable_andy.brew.menu.componenets.Renderer;
-import comfortable_andy.brew.menu.componenets.defaults.ScrollComponent;
-import comfortable_andy.brew.menu.componenets.defaults.SimpleButtonComponent;
-import comfortable_andy.brew.menu.componenets.defaults.SimpleMultipleChoiceComponent;
-import comfortable_andy.brew.menu.componenets.defaults.SimpleTextFieldComponent;
+import comfortable_andy.brew.menu.componenets.defaults.*;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
@@ -120,6 +117,7 @@ public class BrewTestMain extends JavaPlugin implements Listener {
                                             true,
                                             (a, b) -> m.getRenderer().render()
                                     ));
+                                    m.addComponent(new SimpleStaticComponent(new Vector2i(0, 0), () -> new ItemStack(Material.REDSTONE)));
                                     return m;
                                 });
                                 openInv(entity, menu);
