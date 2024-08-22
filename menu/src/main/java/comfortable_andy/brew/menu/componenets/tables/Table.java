@@ -1,6 +1,5 @@
 package comfortable_andy.brew.menu.componenets.tables;
 
-import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import org.apache.commons.lang3.IntegerRange;
@@ -16,7 +15,6 @@ import java.util.Map;
 import java.util.stream.IntStream;
 
 @RequiredArgsConstructor
-@EqualsAndHashCode
 @ToString
 public abstract class Table<T, Self extends Table<T, Self>> implements Iterable<Table.Item<T>>, Cloneable {
 
