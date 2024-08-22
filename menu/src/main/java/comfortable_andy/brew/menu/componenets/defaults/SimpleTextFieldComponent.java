@@ -1,6 +1,7 @@
 package comfortable_andy.brew.menu.componenets.defaults;
 
 import comfortable_andy.brew.menu.actions.MenuAction;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
@@ -19,6 +20,7 @@ public class SimpleTextFieldComponent extends TextFieldComponent {
     private ItemStack item;
     private final BiConsumer<HumanEntity, String> callback;
 
+    @Builder
     public SimpleTextFieldComponent(@NotNull JavaPlugin plugin, @NotNull Vector2i position, ItemStack item, BiConsumer<HumanEntity, String> callback) {
         super(plugin, position);
         this.callback = callback;
