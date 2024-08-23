@@ -24,10 +24,14 @@ apply from: rootProject.file('buildSrc/shared.gradle')
 
 runServer {
     minecraftVersion('1.21')
-    jvmArgs('-Xms1G', '-Xmx1G')
+    jvmArgs('-Xms1G', '-Xmx1G', '-XX:+AllowEnhancedClassRedefinition', '-XX:HotswapAgent=external', '-javaagent:hotswap-agent.jar=disablePlugin=Log4J2')
     downloadPlugins {
         url 'https://ci.dmulloy2.net/job/ProtocolLib/lastSuccessfulBuild/artifact/build/libs/ProtocolLib.jar'
     }
+}
+
+runPaper {
+
 }
 
 shadowJar {
