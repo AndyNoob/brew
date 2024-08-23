@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @see Menu#getRenderer()
  * @see Renderer#render()
  * @see Renderer#tryRender(boolean)
  * @see Menu#updateInventoryView(InventoryView)
