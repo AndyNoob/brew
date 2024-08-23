@@ -1,7 +1,14 @@
+import io.papermc.paperweight.userdev.ReobfArtifactConfiguration
+
 plugins {
     id 'java'
     id 'io.papermc.paperweight.userdev' version '1.7.1'
     id 'maven-publish'
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
 }
 
 group = 'comfortable_andy'
@@ -9,7 +16,9 @@ version = '1.0.0'
 
 apply from: rootProject.file('buildSrc/shared.gradle')
 
-tasks.publishToMavenLocal.dependsOn(tasks.assemble)
+tasks.publishToMavenLocal.dependsOn(tasks.build)
+
+paperweight.reobfArtifactConfiguration = ReobfArtifactConfiguration.getMOJANG_PRODUCTION()
 
 publishing {
     publications {
