@@ -114,7 +114,8 @@ public abstract class Component implements Comparable<Component> {
             for (Snapping<?> snapping : snappings) {
                 snapping.setVal(snapping.getSupplier().get());
             }
-            this.lastSnapTick = Bukkit.getCurrentTick();
+            //noinspection ConstantValue
+            this.lastSnapTick = Bukkit.getServer() == null ? 0 : Bukkit.getCurrentTick();
         }
 
         /**
@@ -132,8 +133,8 @@ public abstract class Component implements Comparable<Component> {
                 if (!Objects.equals(oldState, newState)) changed = true;
                 snapping.setVal(newState);
             }
-
-            this.lastSnapTick = Bukkit.getCurrentTick();
+            //noinspection ConstantValue
+            this.lastSnapTick = Bukkit.getServer() == null ? 0 : Bukkit.getCurrentTick();
             return changed;
         }
 
