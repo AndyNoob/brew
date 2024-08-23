@@ -104,6 +104,9 @@ public abstract class Table<T, Self extends Table<T, Self>> implements Iterable<
     }
 
     public record Item<T>(int x, int y, @Nullable T value) {
+        public Vector2i getPosition() {
+            return new Vector2i(this.x, this.y);
+        }
     }
 
 }

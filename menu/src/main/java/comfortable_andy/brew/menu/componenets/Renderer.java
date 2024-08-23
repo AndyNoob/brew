@@ -15,6 +15,7 @@ import org.joml.Vector2i;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * @see Direction
@@ -157,6 +158,7 @@ public class Renderer {
                 .sorted(Comparator.reverseOrder())
                 .reduce(new LinkedHashMap<>(), (map, component) -> {
                     final Vector2i componentPosition = new Vector2i(component.getPosition());
+                    // convert everything to world space
                     if (component.isFloating()) componentPosition.add(getViewAnchor());
                     final Table<?, ?> table = checkCollision ? component.getCollisionTable() : component.getItemTable();
                     for (Table.Item<?> item : table) {
@@ -170,6 +172,20 @@ public class Renderer {
                     a.putAll(b);
                     return a;
                 });
+    }
+
+    public List<Component> getComponentsInView(Inventory inventory, boolean checkCollision) {
+        final Set<Vector2i> positions = IntStream.range(0, inventory.getSize()).mapToObj(i -> translateToScreenSpaceVec(inventory, i)).collect(Collectors.toSet());
+        return this.components.stream()
+                .sorted(Comparator.reverseOrder())
+                .filter(component -> {
+                    final Table<?, ?> table = checkCollision ? component.getCollisionTable() : component.getItemTable();
+                    for (Table.Item<?> item : table) {
+                        if (positions.contains(item.getPosition())) return true;
+                    }
+                    return false;
+                })
+                .collect(Collectors.toList());
     }
 
     @Range(from = -1, to = 53)

@@ -5,14 +5,12 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector2i;
 
-import java.util.List;
-
 public abstract class ItemInletComponent extends StaticComponent {
 
     public ItemInletComponent(@NotNull Vector2i position) {
         super(position);
     }
 
-    public abstract boolean tryTakeItems(List<ItemStack> items);
+    public abstract boolean tryTakeItems(ItemStack item);
 
 }

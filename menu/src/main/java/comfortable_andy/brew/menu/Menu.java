@@ -3,6 +3,7 @@ package comfortable_andy.brew.menu;
 import comfortable_andy.brew.menu.actions.MenuAction;
 import comfortable_andy.brew.menu.componenets.Component;
 import comfortable_andy.brew.menu.componenets.Renderer;
+import comfortable_andy.brew.menu.componenets.defaults.ItemInletComponent;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
@@ -19,9 +20,8 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 import org.joml.Vector2i;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @see Renderer#render()
@@ -155,7 +155,15 @@ public class Menu extends Displaying {
     }
 
     public boolean handleMoveItems(Inventory inventory, HumanEntity who, ItemStack item, @Range(from = -1, to = 53) int destination) {
-        return false;
+        final Set<Component> components;
+        if (destination == -1) {
+            components = new HashSet<>(this.renderer.getComponentsInView(inventory, true));
+        } else {
+            components = this.renderer.componentsAt(this.renderer.translateToScreenSpaceVec(inventory, destination), true, true).keySet();
+        }
+        final Set<Component> inlets = components.stream().filter(c -> c instanceof ItemInletComponent).collect(Collectors.toSet());
+        if (inlets.size() != 1) return false;
+        return inlets.stream().findFirst().map(c -> ((ItemInletComponent) c).tryTakeItems(item)).orElse(false);
     }
 
 }
