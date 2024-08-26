@@ -11,14 +11,18 @@ import org.joml.Vector2i;
 
 import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class SimpleMultipleChoiceComponent extends MultipleChoiceComponent {
 
+    private final Function<@NotNull String, ItemStack> item;
+
     @Builder
-    public SimpleMultipleChoiceComponent(@NotNull JavaPlugin plugin, @NotNull Vector2i position, ItemStack item, BiConsumer<HumanEntity, String> callback, LinkedHashMap<String, Supplier<ItemStack>> choices) {
+    public SimpleMultipleChoiceComponent(@NotNull JavaPlugin plugin, @NotNull Vector2i position, Function<@NotNull String, ItemStack> item, BiConsumer<HumanEntity, String> callback, LinkedHashMap<String, Supplier<ItemStack>> choices) {
         super(plugin, position, callback, choices);
-        getItemTable().set(0, 0, item);
+        this.item = item;
+        getItemTable().set(0, 0, item.apply(""));
         getCollisionTable().set(0, 0);
         getActions().put((h, r) -> {
             open(h);
@@ -45,4 +49,10 @@ public class SimpleMultipleChoiceComponent extends MultipleChoiceComponent {
             }
         }};
     }
+
+    @Override
+    protected void newChoice(String choice) {
+        getItemTable().set(0, 0, this.item.apply(choice));
+    }
+
 }

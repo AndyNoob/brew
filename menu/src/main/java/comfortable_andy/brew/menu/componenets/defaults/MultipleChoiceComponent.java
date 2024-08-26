@@ -64,6 +64,9 @@ public abstract class MultipleChoiceComponent extends InventorySwitchingComponen
 
     protected abstract String displayName();
 
+    protected void newChoice(String choice) {
+    }
+
     protected void generateChoiceButtons() {
         int i = 0;
 
@@ -79,6 +82,7 @@ public abstract class MultipleChoiceComponent extends InventorySwitchingComponen
                     entry.getValue().get(),
                     h -> {
                         this.callback.accept(h, entry.getKey());
+                        newChoice(entry.getKey());
                         reopenOriginal(h);
                     }
             ));
