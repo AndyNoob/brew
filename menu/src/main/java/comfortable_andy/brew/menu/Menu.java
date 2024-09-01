@@ -67,12 +67,12 @@ public class Menu extends Displaying {
         boolean clickedMenu = clickedInventory == renderer.getInventory();
         switch (event.getAction()) {
             case MOVE_TO_OTHER_INVENTORY -> {
-                handleMoveItems(event.getView(), !clickedMenu, entity, event.getSlot(), -1, event::setCurrentItem);
-                event.setCancelled(true);
+                if(!handleMoveItems(event.getView(), !clickedMenu, entity, event.getSlot(), -1, event::setCurrentItem))
+                    event.setCancelled(true);
             }
             case COLLECT_TO_CURSOR -> {
                 final ItemStack collecting = event.getCursor();
-                for (ItemStack stack : event.getView().getTopInventory()) {
+                for (ItemStack stack : otherInventory) {
                     if (collecting.isSimilar(stack)) {
                         event.setCancelled(true);
                         break;
@@ -87,32 +87,43 @@ public class Menu extends Displaying {
                     entity,
                     -1,
                     event.getSlot(),
-                    i -> entity.setItemOnCursor(i)
+                    entity::setItemOnCursor
             )) {
                 event.setCancelled(true);
                 return;
             }
         } else if (event.getClick() == ClickType.NUMBER_KEY) {
             if (!clickedMenu) return;
-            if (handleMoveItems(
+            handleMoveItems(
                     event.getView(),
                     true,
                     entity,
                     event.getHotbarButton(),
                     event.getSlot(),
                     i -> event.getView().getBottomInventory().setItem(event.getHotbarButton(), i)
-            )
-                    || handleMoveItems(
+            );
+            handleMoveItems(
                     event.getView(),
                     false,
                     entity,
                     event.getSlot(),
                     event.getHotbarButton(),
                     null
+            );
+        } else if (event.getAction().name().contains("PICKUP") && clickedMenu) {
+            if (handleMoveItems(
+                    event.getView(),
+                    false,
+                    entity,
+                    event.getSlot(),
+                    -1,
+                    null
             )) {
-                // TODO handle this
+                event.setCancelled(true);
+                return;
             }
         }
+        if (!clickedMenu) return;
         MenuAction.ActionModifier modifier = MenuAction.ActionModifier.NONE;
         final MenuAction.ActionType type = switch (event.getClick()) {
             case DROP, LEFT, SWAP_OFFHAND -> MenuAction.ActionType.LEFT;
@@ -178,7 +189,7 @@ public class Menu extends Displaying {
 
     public boolean handleMoveItems(InventoryView view, boolean toMenu, HumanEntity who, @Range(from = -1, to = 53) int from, @Range(from = -1, to = 53) int destination, @Nullable Consumer<ItemStack> remainderHandler) {
         if (toMenu) {
-            ItemStack moving = from == -1 ? who.getItemOnCursor() : view.getBottomInventory().getItem(destination);
+            ItemStack moving = from == -1 ? who.getItemOnCursor() : view.getBottomInventory().getItem(from);
             final Map<Component, Vector2i> componentsAt;
             if (destination == -1)
                 componentsAt = this.renderer.getComponentsInView(view.getTopInventory(), true);
@@ -193,11 +204,11 @@ public class Menu extends Displaying {
                 );
             }
             List<Component> components = new ArrayList<>(componentsAt.keySet());
-            if (components.size() > 1) return false;
+            if (components.size() != 1) return false;
             Component component = components.get(0);
             if (!(component instanceof ItemInletComponent inlet)) return false;
             assert remainderHandler != null;
-            remainderHandler.accept(inlet.tryTakeInItems(who, componentsAt.get(component), moving));
+            remainderHandler.accept(inlet.tryTakeInItems(who, destination == -1 ? null : componentsAt.get(component), moving));
         } else {
             if (from == -1) return false;
             final var componentsAt = this.renderer.componentsAt(
@@ -209,17 +220,23 @@ public class Menu extends Displaying {
                     true
             );
             List<Component> components = new ArrayList<>(componentsAt.keySet());
-            if (components.size() > 1) return false;
+            if (components.size() != 1) return false;
             Component component = components.get(0);
             if (!(component instanceof ItemOutletComponent outlet)) return false;
             ItemStack out = outlet.tryTakeOutItems(who, componentsAt.get(component));
             if (out == null) return false;
             if (destination == -1) {
-                who.setItemOnCursor(out);
+                if (who.getItemOnCursor().isEmpty()) who.setItemOnCursor(out);
+                else {
+                    for (Map.Entry<Integer, ItemStack> entry : view.getBottomInventory().addItem(out).entrySet()) {
+                        who.getWorld().dropItem(who.getEyeLocation(), entry.getValue());
+                    }
+                };
             } else {
                 view.getBottomInventory().setItem(destination, out);
             }
         }
+        this.renderer.render();
         return true;
     }
 

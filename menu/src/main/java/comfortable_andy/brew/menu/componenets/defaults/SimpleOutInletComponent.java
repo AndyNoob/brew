@@ -1,6 +1,5 @@
-package comfortable_andy.brew.test_plugin.components;
+package comfortable_andy.brew.menu.componenets.defaults;
 
-import comfortable_andy.brew.menu.componenets.defaults.ItemOutletComponent;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
