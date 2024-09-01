@@ -4,6 +4,7 @@ import comfortable_andy.brew.menu.actions.MenuAction;
 import comfortable_andy.brew.menu.componenets.Component;
 import comfortable_andy.brew.menu.componenets.Renderer;
 import comfortable_andy.brew.menu.componenets.defaults.ItemInletComponent;
+import comfortable_andy.brew.menu.componenets.defaults.ItemOutletComponent;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
@@ -20,9 +21,10 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 import org.joml.Vector2i;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 /**
  * @see Renderer#render()
@@ -58,43 +60,58 @@ public class Menu extends Displaying {
 
     public void handleClick(InventoryClickEvent event) {
         if (this.renderer.getInventory() == null) return;
-        if (event.getClickedInventory() != this.renderer.getInventory()) {
-            switch (event.getAction()) {
-                case MOVE_TO_OTHER_INVENTORY -> {
-                    handleMoveItems(this.renderer.getInventory(), event.getWhoClicked(), event.getCurrentItem(), -1, event::setCurrentItem);
-                    event.setCancelled(true);
-                }
-                case COLLECT_TO_CURSOR -> {
-                    final ItemStack collecting = event.getCursor();
-                    for (ItemStack stack : event.getView().getTopInventory()) {
-                        if (collecting.isSimilar(stack)) {
-                            event.setCancelled(true);
-                            break;
-                        }
+        Inventory clickedInventory = event.getClickedInventory();
+        Inventory otherInventory = event.getView().getTopInventory() == clickedInventory ? event.getView().getBottomInventory() : event.getView().getTopInventory();
+        if (clickedInventory != renderer.getInventory() && otherInventory != renderer.getInventory()) return;
+        HumanEntity entity = event.getWhoClicked();
+        boolean clickedMenu = clickedInventory == renderer.getInventory();
+        switch (event.getAction()) {
+            case MOVE_TO_OTHER_INVENTORY -> {
+                handleMoveItems(event.getView(), !clickedMenu, entity, event.getSlot(), -1, event::setCurrentItem);
+                event.setCancelled(true);
+            }
+            case COLLECT_TO_CURSOR -> {
+                final ItemStack collecting = event.getCursor();
+                for (ItemStack stack : event.getView().getTopInventory()) {
+                    if (collecting.isSimilar(stack)) {
+                        event.setCancelled(true);
+                        break;
                     }
                 }
             }
-            return;
         }
-        ItemStack moving = null;
-        Consumer<ItemStack> handler = null;
         if (event.getAction().name().contains("PLACE")) {
-            moving = event.getCursor();
-            handler = i -> event.getWhoClicked().setItemOnCursor(i);
+            if (handleMoveItems(
+                    event.getView(),
+                    clickedMenu,
+                    entity,
+                    -1,
+                    event.getSlot(),
+                    i -> entity.setItemOnCursor(i)
+            )) {
+                event.setCancelled(true);
+                return;
+            }
         } else if (event.getClick() == ClickType.NUMBER_KEY) {
-            moving = event.getView().getBottomInventory().getItem(event.getHotbarButton());
-            handler = i -> event.getView().getBottomInventory().setItem(event.getHotbarButton(), i);
-        }
-        if (moving != null &&
-                handleMoveItems(
-                        this.renderer.getInventory(),
-                        event.getWhoClicked(),
-                        moving,
-                        event.getSlot(),
-                        handler
-                )) {
-            event.setCancelled(true);
-            return;
+            if (!clickedMenu) return;
+            if (handleMoveItems(
+                    event.getView(),
+                    true,
+                    entity,
+                    event.getHotbarButton(),
+                    event.getSlot(),
+                    i -> event.getView().getBottomInventory().setItem(event.getHotbarButton(), i)
+            )
+                    || handleMoveItems(
+                    event.getView(),
+                    false,
+                    entity,
+                    event.getSlot(),
+                    event.getHotbarButton(),
+                    null
+            )) {
+                // TODO handle this
+            }
         }
         MenuAction.ActionModifier modifier = MenuAction.ActionModifier.NONE;
         final MenuAction.ActionType type = switch (event.getClick()) {
@@ -116,7 +133,7 @@ public class Menu extends Displaying {
             default -> null;
         };
         if (type == null) return;
-        boolean cancel = handleClick(event.getClickedInventory(), type, modifier, event.getSlot(), event.getWhoClicked());
+        boolean cancel = handleClick(clickedInventory, type, modifier, event.getSlot(), entity);
         if (cancel) {
             event.setCancelled(true);
             this.renderer.tryRender(false);
@@ -159,20 +176,51 @@ public class Menu extends Displaying {
         return !ran || cancel;
     }
 
-    public boolean handleMoveItems(Inventory inventory, HumanEntity who, ItemStack item, @Range(from = -1, to = 53) int destination, Consumer<ItemStack> remainderHandler) {
-        final Set<Component> components;
-        if (destination == -1) {
-            components = new HashSet<>(this.renderer.getComponentsInView(inventory, true));
+    public boolean handleMoveItems(InventoryView view, boolean toMenu, HumanEntity who, @Range(from = -1, to = 53) int from, @Range(from = -1, to = 53) int destination, @Nullable Consumer<ItemStack> remainderHandler) {
+        if (toMenu) {
+            ItemStack moving = from == -1 ? who.getItemOnCursor() : view.getBottomInventory().getItem(destination);
+            final Map<Component, Vector2i> componentsAt;
+            if (destination == -1)
+                componentsAt = this.renderer.getComponentsInView(view.getTopInventory(), true);
+            else {
+                componentsAt = this.renderer.componentsAt(
+                        this.renderer.translateToScreenSpaceVec(
+                                view.getTopInventory(),
+                                destination
+                        ),
+                        true,
+                        true
+                );
+            }
+            List<Component> components = new ArrayList<>(componentsAt.keySet());
+            if (components.size() > 1) return false;
+            Component component = components.get(0);
+            if (!(component instanceof ItemInletComponent inlet)) return false;
+            assert remainderHandler != null;
+            remainderHandler.accept(inlet.tryTakeInItems(who, componentsAt.get(component), moving));
         } else {
-            components = this.renderer.componentsAt(this.renderer.translateToScreenSpaceVec(inventory, destination), true, true).keySet();
+            if (from == -1) return false;
+            final var componentsAt = this.renderer.componentsAt(
+                    this.renderer.translateToScreenSpaceVec(
+                            view.getTopInventory(),
+                            from
+                    ),
+                    true,
+                    true
+            );
+            List<Component> components = new ArrayList<>(componentsAt.keySet());
+            if (components.size() > 1) return false;
+            Component component = components.get(0);
+            if (!(component instanceof ItemOutletComponent outlet)) return false;
+            ItemStack out = outlet.tryTakeOutItems(who, componentsAt.get(component));
+            if (out == null) return false;
+            if (destination == -1) {
+                who.setItemOnCursor(out);
+            } else {
+                view.getBottomInventory().setItem(destination, out);
+            }
         }
-        final Set<Component> inlets = components.stream().filter(c -> c instanceof ItemInletComponent).collect(Collectors.toSet());
-        if (inlets.size() != 1) return false;
-        return inlets.stream().findFirst().map(c -> ((ItemInletComponent) c).tryTakeItems(who, item)).map(i -> {
-            remainderHandler.accept(i);
-            getRenderer().tryRender(false);
-            return true;
-        }).orElse(false);
+        return true;
     }
 
 }

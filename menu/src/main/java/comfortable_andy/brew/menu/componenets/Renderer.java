@@ -174,18 +174,24 @@ public class Renderer {
                 });
     }
 
-    public List<Component> getComponentsInView(Inventory inventory, boolean checkCollision) {
+    public HashMap<Component, Vector2i> getComponentsInView(Inventory inventory, boolean checkCollision) {
         final Set<Vector2i> positions = IntStream.range(0, inventory.getSize()).mapToObj(i -> translateToScreenSpaceVec(inventory, i)).collect(Collectors.toSet());
         return this.components.stream()
                 .sorted(Comparator.reverseOrder())
-                .filter(component -> {
+                .reduce(new HashMap<>(), (map, component) -> {
                     final Table<?, ?> table = checkCollision ? component.getCollisionTable() : component.getItemTable();
                     for (Table.Item<?> item : table) {
-                        if (positions.contains(item.getPosition())) return true;
+                        Vector2i pos = item.getPosition();
+                        if (positions.contains(pos)) {
+                            map.put(component, pos);
+                            break;
+                        }
                     }
-                    return false;
-                })
-                .collect(Collectors.toList());
+                    return map;
+                }, (a, b) -> {
+                    a.putAll(b);
+                    return a;
+                });
     }
 
     @Range(from = -1, to = 53)
