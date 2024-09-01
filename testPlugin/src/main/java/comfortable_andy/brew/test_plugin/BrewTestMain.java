@@ -9,6 +9,7 @@ import com.mojang.brigadier.Command;
 import comfortable_andy.brew.menu.Menu;
 import comfortable_andy.brew.menu.componenets.Renderer;
 import comfortable_andy.brew.menu.componenets.defaults.*;
+import comfortable_andy.brew.test_plugin.components.SimpleInletComponent;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
@@ -124,6 +125,21 @@ public class BrewTestMain extends JavaPlugin implements Listener {
                                 return Command.SINGLE_SUCCESS;
                             })
             );
+            root.then(
+                    Commands.literal("inlet")
+                            .executes(s -> {
+                                final CommandSourceStack source = s.getSource();
+                                final CommandSender sender = source.getExecutor() == null ? source.getSender() : source.getExecutor();
+                                if (!(sender instanceof HumanEntity entity)) return 0;
+                                var menu = menus.compute(entity, (k, v) -> {
+                                    Menu m = new Menu("ew", "32", "32432");
+                                    m.addComponent(new SimpleInletComponent(new Vector2i(0, 0), 3, 3));
+                                    return m;
+                                });
+                                openInv(entity, menu);
+                                return Command.SINGLE_SUCCESS;
+                            }
+            ));
             commands.register(root.build());
         });
     }
