@@ -21,6 +21,7 @@ import org.jetbrains.annotations.Range;
 import org.joml.Vector2i;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -60,7 +61,7 @@ public class Menu extends Displaying {
         if (event.getClickedInventory() != this.renderer.getInventory()) {
             switch (event.getAction()) {
                 case MOVE_TO_OTHER_INVENTORY -> {
-                    handleMoveItems(this.renderer.getInventory(), event.getWhoClicked(), event.getCurrentItem(), -1);
+                    handleMoveItems(this.renderer.getInventory(), event.getWhoClicked(), event.getCurrentItem(), -1, event::setCurrentItem);
                     event.setCancelled(true);
                 }
                 case COLLECT_TO_CURSOR -> {
@@ -76,17 +77,21 @@ public class Menu extends Displaying {
             return;
         }
         ItemStack moving = null;
+        Consumer<ItemStack> handler = null;
         if (event.getAction().name().contains("PLACE")) {
             moving = event.getCursor();
+            handler = i -> event.getWhoClicked().setItemOnCursor(i);
         } else if (event.getClick() == ClickType.NUMBER_KEY) {
             moving = event.getView().getBottomInventory().getItem(event.getHotbarButton());
+            handler = i -> event.getView().getBottomInventory().setItem(event.getHotbarButton(), i);
         }
         if (moving != null &&
                 handleMoveItems(
                         this.renderer.getInventory(),
                         event.getWhoClicked(),
                         moving,
-                        event.getSlot()
+                        event.getSlot(),
+                        handler
                 )) {
             event.setCancelled(true);
             return;
@@ -154,7 +159,7 @@ public class Menu extends Displaying {
         return !ran || cancel;
     }
 
-    public boolean handleMoveItems(Inventory inventory, HumanEntity who, ItemStack item, @Range(from = -1, to = 53) int destination) {
+    public boolean handleMoveItems(Inventory inventory, HumanEntity who, ItemStack item, @Range(from = -1, to = 53) int destination, Consumer<ItemStack> remainderHandler) {
         final Set<Component> components;
         if (destination == -1) {
             components = new HashSet<>(this.renderer.getComponentsInView(inventory, true));
@@ -163,7 +168,11 @@ public class Menu extends Displaying {
         }
         final Set<Component> inlets = components.stream().filter(c -> c instanceof ItemInletComponent).collect(Collectors.toSet());
         if (inlets.size() != 1) return false;
-        return inlets.stream().findFirst().map(c -> ((ItemInletComponent) c).tryTakeItems(item)).orElse(false);
+        return inlets.stream().findFirst().map(c -> ((ItemInletComponent) c).tryTakeItems(who, item)).map(i -> {
+            remainderHandler.accept(i);
+            getRenderer().tryRender(false);
+            return true;
+        }).orElse(false);
     }
 
 }
