@@ -50,7 +50,7 @@ public class SimpleInletComponent extends ItemInletComponent {
             if (cur.getAmount() >= item.getMaxStackSize()) continue;
             if (!cur.isSimilar(item)) continue;
             final int total = item.getAmount() + cur.getAmount();
-            final int actualNew = Math.max(cur.getMaxStackSize(), total);
+            final int actualNew = Math.min(cur.getMaxStackSize(), total);
             cur.setAmount(actualNew);
             final int remainder = total - actualNew;
             item.setAmount(remainder);
