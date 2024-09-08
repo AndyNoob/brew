@@ -19,8 +19,8 @@ public class SimpleMultipleChoiceComponent extends MultipleChoiceComponent {
     private final Function<@NotNull String, ItemStack> item;
 
     @Builder
-    public SimpleMultipleChoiceComponent(@NotNull JavaPlugin plugin, @NotNull Vector2i position, Function<@NotNull String, ItemStack> item, BiConsumer<HumanEntity, String> callback, LinkedHashMap<String, Supplier<ItemStack>> choices) {
-        super(plugin, position, callback, choices);
+    public SimpleMultipleChoiceComponent(@NotNull JavaPlugin plugin, @NotNull Vector2i position, Function<@NotNull String, ItemStack> item, BiConsumer<HumanEntity, String> callback, LinkedHashMap<String, Supplier<ItemStack>> choices, String displayName) {
+        super(plugin, position, callback, choices, displayName);
         this.item = item;
         getItemTable().set(0, 0, item.apply(""));
         getCollisionTable().set(0, 0);
@@ -28,11 +28,6 @@ public class SimpleMultipleChoiceComponent extends MultipleChoiceComponent {
             open(h);
             return true;
         }, MenuAction.ActionCriteria.builder().type(MenuAction.ActionType.LEFT).build());
-    }
-
-    @Override
-    protected String displayName() {
-        return "yo mama";
     }
 
     @NotNull

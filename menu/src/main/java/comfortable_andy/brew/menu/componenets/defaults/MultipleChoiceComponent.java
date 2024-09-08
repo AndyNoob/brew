@@ -30,17 +30,19 @@ public abstract class MultipleChoiceComponent extends InventorySwitchingComponen
     protected final Menu menu;
     protected final BiConsumer<HumanEntity, String> callback;
     protected final LinkedHashMap<String, Supplier<ItemStack>> choices;
+    protected final String displayName;
     protected int rows;
 
-    public MultipleChoiceComponent(@NotNull JavaPlugin plugin, @NotNull Vector2i position, BiConsumer<HumanEntity, String> callback, LinkedHashMap<String, Supplier<ItemStack>> choices) {
+    public MultipleChoiceComponent(@NotNull JavaPlugin plugin, @NotNull Vector2i position, BiConsumer<HumanEntity, String> callback, LinkedHashMap<String, Supplier<ItemStack>> choices, String displayName) {
         super(plugin, position);
         this.choices = choices;
         this.callback = callback;
         final int choiceSize = choices.size();
         this.rows = NumberConversions.ceil(choiceSize / 9f);
+        this.displayName = displayName;
         this.menu = new Menu(
                 "" + hashCode(),
-                displayName(),
+                this.displayName,
                 "auto created by " + this.getClass().getSimpleName()
         );
         final int pageCount = NumberConversions.ceil((choiceSize * 1f) / MAX_CHOICES_PAGE);
@@ -61,8 +63,6 @@ public abstract class MultipleChoiceComponent extends InventorySwitchingComponen
         generateChoiceButtons();
         renderer.render();
     }
-
-    protected abstract String displayName();
 
     protected void newChoice(String choice) {
     }

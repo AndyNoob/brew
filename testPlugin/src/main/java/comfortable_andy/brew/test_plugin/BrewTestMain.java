@@ -86,9 +86,10 @@ public class BrewTestMain extends JavaPlugin implements Listener {
                                             .builder()
                                             .plugin(this)
                                             .position(new Vector2i())
-                                            .item(new ItemStack(Material.PAPER))
+                                            .item((str) -> new ItemStack(Material.PAPER))
                                             .callback(CommandSender::sendMessage)
                                             .choices(SimpleMultipleChoiceComponent.randomChoices())
+                                            .displayName("yo mamaaa")
                                             .build()
                                     );
                                     return m;
