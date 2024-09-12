@@ -7,6 +7,8 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Range;
 import org.joml.Vector2i;
 
 import java.util.*;
@@ -19,8 +21,8 @@ public class SimpleMultipleChoiceComponent extends MultipleChoiceComponent {
     private final Function<@NotNull String, ItemStack> item;
 
     @Builder
-    public SimpleMultipleChoiceComponent(@NotNull JavaPlugin plugin, @NotNull Vector2i position, Function<@NotNull String, ItemStack> item, BiConsumer<HumanEntity, String> callback, LinkedHashMap<String, Supplier<ItemStack>> choices, String displayName) {
-        super(plugin, position, callback, choices, displayName);
+    public SimpleMultipleChoiceComponent(@NotNull JavaPlugin plugin, @NotNull Vector2i position, Function<@NotNull String, ItemStack> item, BiConsumer<HumanEntity, String> callback, LinkedHashMap<String, Supplier<ItemStack>> choices, String displayName, @Nullable @Range(from = 1, to = 6) Integer rows) {
+        super(plugin, position, callback, choices, displayName, rows);
         this.item = item;
         getItemTable().set(0, 0, item.apply(""));
         getCollisionTable().set(0, 0);

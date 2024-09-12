@@ -26,6 +26,7 @@ public abstract class TextFieldComponent extends InventorySwitchingComponent<Anv
         super(plugin, position);
         this.onPrepare = makeListener(plugin, (l, e) -> handleRenaming((PrepareAnvilEvent) e, resultReference));
         PrepareAnvilEvent.getHandlerList().register(this.onPrepare);
+        listeners.put(this.onPrepare, PrepareAnvilEvent.getHandlerList());
     }
 
     private void handleRenaming(PrepareAnvilEvent e, AtomicReference<ItemStack> resultReference) {

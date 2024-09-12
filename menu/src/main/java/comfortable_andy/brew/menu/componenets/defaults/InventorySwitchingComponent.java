@@ -6,6 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -17,12 +18,28 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector2i;
 
+import java.lang.ref.Cleaner;
 import java.util.HashMap;
 import java.util.Map;
 
 public abstract class InventorySwitchingComponent<Inv extends Inventory> extends StaticComponent {
 
+    private static final Cleaner CLEANER = Cleaner.create();
+
+    private record CleaningAction(Map<RegisteredListener, HandlerList> listeners) implements Runnable {
+
+        @Override
+        public void run() {
+            for (Map.Entry<RegisteredListener, HandlerList> entry : listeners.entrySet()) {
+                entry.getValue().unregister(entry.getKey());
+            }
+        }
+
+    }
+
     private static final NotListener LISTENER = new NotListener();
+    private final Cleaner.Cleanable cleanable;
+    protected final Map<RegisteredListener, HandlerList> listeners;
     protected final Map<HumanEntity, Inventory> openInv = new HashMap<>();
     protected final Map<HumanEntity, Inventory> dontReopen = new HashMap<>();
     protected final Map<HumanEntity, Inventory> reopens = new HashMap<>();
@@ -41,6 +58,12 @@ public abstract class InventorySwitchingComponent<Inv extends Inventory> extends
         InventoryClickEvent.getHandlerList().register(this.onClick);
         InventoryCloseEvent.getHandlerList().register(this.onClose);
         InventoryDragEvent.getHandlerList().register(this.onDrag);
+        this.listeners = new HashMap<>() {{
+            put(onClick, InventoryClickEvent.getHandlerList());
+            put(onClose, InventoryCloseEvent.getHandlerList());
+            put(onDrag, InventoryDragEvent.getHandlerList());
+        }};
+        this.cleanable = CLEANER.register(this, new CleaningAction(this.listeners));
     }
 
     protected void handleClose(InventoryCloseEvent e) {
@@ -96,9 +119,7 @@ public abstract class InventorySwitchingComponent<Inv extends Inventory> extends
     @Override
     public void postRemoval() {
         isRemoved = true;
-        InventoryCloseEvent.getHandlerList().unregister(this.onClose);
-        InventoryClickEvent.getHandlerList().unregister(this.onClick);
-        InventoryDragEvent.getHandlerList().unregister(this.onDrag);
+        this.cleanable.clean();
     }
 
     @Override

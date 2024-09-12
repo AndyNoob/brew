@@ -15,6 +15,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.NumberConversions;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Range;
 import org.joml.Vector2i;
 
 import java.util.LinkedHashMap;
@@ -33,12 +34,12 @@ public abstract class MultipleChoiceComponent extends InventorySwitchingComponen
     protected final String displayName;
     protected int rows;
 
-    public MultipleChoiceComponent(@NotNull JavaPlugin plugin, @NotNull Vector2i position, BiConsumer<HumanEntity, String> callback, LinkedHashMap<String, Supplier<ItemStack>> choices, String displayName) {
+    public MultipleChoiceComponent(@NotNull JavaPlugin plugin, @NotNull Vector2i position, BiConsumer<HumanEntity, String> callback, LinkedHashMap<String, Supplier<ItemStack>> choices, String displayName, @Nullable @Range(from = 1, to = 6) Integer rows) {
         super(plugin, position);
         this.choices = choices;
         this.callback = callback;
         final int choiceSize = choices.size();
-        this.rows = NumberConversions.ceil(choiceSize / 9f);
+        this.rows = rows == null ? NumberConversions.ceil(choiceSize / 9f) : rows;
         this.displayName = displayName;
         this.menu = new Menu(
                 "" + hashCode(),
@@ -50,11 +51,11 @@ public abstract class MultipleChoiceComponent extends InventorySwitchingComponen
         if (pageCount > 1) {
             component = makeScrollComponent(pageCount);
             if (component != null) {
-                rows += 1;
+                this.rows += 1;
                 menu.addComponent(component);
             }
         } else component = null;
-        final int invSize = Math.min(54, rows * 9);
+        final int invSize = Math.min(54, this.rows * 9);
         this.choiceInv = Bukkit.createInventory(null, invSize);
         final Renderer renderer = this.menu.getRenderer();
         renderer.setInventory(this.choiceInv);
@@ -73,7 +74,7 @@ public abstract class MultipleChoiceComponent extends InventorySwitchingComponen
         for (Map.Entry<String, Supplier<ItemStack>> entry : this.choices.entrySet()) {
             final int horizontalOffset = i / MAX_CHOICES_PAGE;
             final int x = i % 9 - 4 + 9 * horizontalOffset;
-            final int y = this.rows / 2 - (i % MAX_CHOICES_PAGE) / 9 - 1;
+            final int y = this.rows / 2 - (i % MAX_CHOICES_PAGE) / 9;
             Vector2i pos = new Vector2i(x, y);
             this.menu.addComponent(new SimpleButtonComponent(
                     pos,
