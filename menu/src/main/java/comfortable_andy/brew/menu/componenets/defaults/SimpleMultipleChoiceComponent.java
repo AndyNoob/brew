@@ -16,6 +16,10 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+/**
+ * Will not re-render automatically
+ * @see comfortable_andy.brew.menu.componenets.Renderer#tryRender(boolean)
+ */
 public class SimpleMultipleChoiceComponent extends MultipleChoiceComponent {
 
     private final Function<@NotNull String, ItemStack> item;
@@ -32,6 +36,7 @@ public class SimpleMultipleChoiceComponent extends MultipleChoiceComponent {
         }, MenuAction.ActionCriteria.builder().type(MenuAction.ActionType.LEFT).build());
     }
 
+    @SuppressWarnings("unused")
     @NotNull
     public static LinkedHashMap<String, Supplier<ItemStack>> randomChoices() {
         final List<Material> itemMats = new ArrayList<>(Arrays.stream(Material.values())
