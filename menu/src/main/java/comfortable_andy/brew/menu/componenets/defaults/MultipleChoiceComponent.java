@@ -82,8 +82,8 @@ public abstract class MultipleChoiceComponent extends InventorySwitchingComponen
                     1,
                     entry.getValue().get(),
                     h -> {
-                        this.callback.accept(h, entry.getKey());
                         newChoice(entry.getKey());
+                        this.callback.accept(h, entry.getKey());
                         reopenOriginal(h);
                     }
             ));
