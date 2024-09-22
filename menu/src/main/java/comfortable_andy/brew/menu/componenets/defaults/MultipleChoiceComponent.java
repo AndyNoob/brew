@@ -34,12 +34,12 @@ public abstract class MultipleChoiceComponent extends InventorySwitchingComponen
     protected final String displayName;
     protected int rows;
 
-    public MultipleChoiceComponent(@NotNull JavaPlugin plugin, @NotNull Vector2i position, BiConsumer<HumanEntity, String> callback, LinkedHashMap<String, Supplier<ItemStack>> choices, String displayName, @Nullable @Range(from = 1, to = 6) Integer rows) {
+    public MultipleChoiceComponent(@NotNull JavaPlugin plugin, @NotNull Vector2i position, BiConsumer<HumanEntity, String> callback, LinkedHashMap<String, Supplier<ItemStack>> choices, String displayName, @Nullable @Range(from = 1, to = 6) Integer additionalRows) {
         super(plugin, position);
         this.choices = choices;
         this.callback = callback;
         final int choiceSize = choices.size();
-        this.rows = rows == null ? NumberConversions.ceil(choiceSize / 9f) : rows;
+        this.rows = NumberConversions.ceil(choiceSize / 9f) + (additionalRows == null ? 0 : additionalRows);
         this.displayName = displayName;
         this.menu = new Menu(
                 "" + hashCode(),

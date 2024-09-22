@@ -25,8 +25,8 @@ public class SimpleMultipleChoiceComponent extends MultipleChoiceComponent {
     private final Function<@NotNull String, ItemStack> item;
 
     @Builder
-    public SimpleMultipleChoiceComponent(@NotNull JavaPlugin plugin, @NotNull Vector2i position, Function<@NotNull String, ItemStack> item, BiConsumer<HumanEntity, String> callback, LinkedHashMap<String, Supplier<ItemStack>> choices, String displayName, @Nullable @Range(from = 1, to = 6) Integer rows) {
-        super(plugin, position, callback, choices, displayName, rows);
+    public SimpleMultipleChoiceComponent(@NotNull JavaPlugin plugin, @NotNull Vector2i position, Function<@NotNull String, ItemStack> item, BiConsumer<HumanEntity, String> callback, LinkedHashMap<String, Supplier<ItemStack>> choices, String displayName, @Nullable @Range(from = 1, to = 6) Integer additionalRows) {
+        super(plugin, position, callback, choices, displayName, additionalRows);
         this.item = item;
         getItemTable().set(0, 0, item.apply(""));
         getCollisionTable().set(0, 0);
