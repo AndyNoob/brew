@@ -25,8 +25,8 @@ public class SimpleMultipleChoiceComponent extends MultipleChoiceComponent {
     private final Function<@NotNull String, ItemStack> item;
 
     @Builder
-    public SimpleMultipleChoiceComponent(@NotNull JavaPlugin plugin, @NotNull Vector2i position, Function<@NotNull String, ItemStack> item, BiConsumer<HumanEntity, String> callback, LinkedHashMap<String, Supplier<ItemStack>> choices, String displayName, @Nullable @Range(from = 1, to = 6) Integer additionalRows) {
-        super(plugin, position, callback, choices, displayName, additionalRows);
+    public SimpleMultipleChoiceComponent(@NotNull JavaPlugin plugin, @NotNull Vector2i position, Function<@NotNull String, ItemStack> item, BiConsumer<HumanEntity, Set<String>> callback, LinkedHashMap<String, Supplier<ItemStack>> choices, String displayName, @Nullable @Range(from = 1, to = 6) Integer additionalRows, @Range(from = 1, to = Integer.MAX_VALUE) int choiceLimit) {
+        super(plugin, position, callback, choices, displayName, additionalRows, choiceLimit);
         this.item = item;
         getItemTable().set(0, 0, item.apply(""));
         getCollisionTable().set(0, 0);
@@ -55,6 +55,15 @@ public class SimpleMultipleChoiceComponent extends MultipleChoiceComponent {
     @Override
     protected void newChoice(String choice) {
         getItemTable().set(0, 0, this.item.apply(choice));
+    }
+
+    @Override
+    protected ItemStack changeItemVisual(ItemStack item, boolean selected) {
+        item.editMeta(meta -> {
+            if (meta.hasEnchants()) return;
+            meta.setEnchantmentGlintOverride(selected);
+        });
+        return item;
     }
 
 }

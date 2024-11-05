@@ -30,7 +30,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.joml.Vector2i;
 
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class BrewTestMain extends JavaPlugin implements Listener {
@@ -88,11 +87,10 @@ public class BrewTestMain extends JavaPlugin implements Listener {
                                             .plugin(this)
                                             .position(new Vector2i())
                                             .item((str) -> new ItemStack(Material.PAPER))
-                                            .callback(CommandSender::sendMessage)
-                                            .choices(new LinkedHashMap<>(){{
-                                                put("what", () -> new ItemStack(Material.BONE));
-                                            }})
-                                            .rows(2)
+                                            .callback((clicked, set) -> clicked.sendMessage(set.toString()))
+                                            .choices(SimpleMultipleChoiceComponent.randomChoices())
+                                            .additionalRows(0)
+                                            .choiceLimit(1)
                                             .displayName("yo mamaaa")
                                             .build()
                                     );

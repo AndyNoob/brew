@@ -18,8 +18,11 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 import org.joml.Vector2i;
 
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
@@ -29,17 +32,21 @@ public abstract class MultipleChoiceComponent extends InventorySwitchingComponen
     private static final int MAX_CHOICES_PAGE = 9 * 5;
     protected final Inventory choiceInv;
     protected final Menu menu;
-    protected final BiConsumer<HumanEntity, String> callback;
+    protected final BiConsumer<HumanEntity, Set<String>> callback;
     protected final LinkedHashMap<String, Supplier<ItemStack>> choices;
     protected final String displayName;
     protected int rows;
+    protected int choiceLimit;
+    protected final Set<String> chosen = new HashSet<>();
 
-    public MultipleChoiceComponent(@NotNull JavaPlugin plugin, @NotNull Vector2i position, BiConsumer<HumanEntity, String> callback, LinkedHashMap<String, Supplier<ItemStack>> choices, String displayName, @Nullable @Range(from = 1, to = 6) Integer additionalRows) {
+    public MultipleChoiceComponent(@NotNull JavaPlugin plugin, @NotNull Vector2i position, BiConsumer<HumanEntity, Set<String>> callback, LinkedHashMap<String, Supplier<ItemStack>> choices, String displayName, @Nullable @Range(from = 1, to = 6) Integer additionalRows, @Range(from = 1, to = Integer.MAX_VALUE) int choiceLimit) {
         super(plugin, position);
+        this.choiceLimit = choiceLimit;
         this.choices = choices;
         this.callback = callback;
         final int choiceSize = choices.size();
         this.rows = NumberConversions.ceil(choiceSize / 9f) + (additionalRows == null ? 0 : additionalRows);
+        System.out.println(rows);
         this.displayName = displayName;
         this.menu = new Menu(
                 "" + hashCode(),
@@ -74,22 +81,35 @@ public abstract class MultipleChoiceComponent extends InventorySwitchingComponen
         for (Map.Entry<String, Supplier<ItemStack>> entry : this.choices.entrySet()) {
             final int horizontalOffset = i / MAX_CHOICES_PAGE;
             final int x = i % 9 - 4 + 9 * horizontalOffset;
-            final int y = this.rows / 2 - (i % MAX_CHOICES_PAGE) / 9;
+            final int y = this.rows / 2 - (i % MAX_CHOICES_PAGE) / 9 - 1;
             Vector2i pos = new Vector2i(x, y);
+            ItemStack item = entry.getValue().get();
+            AtomicBoolean selected = new AtomicBoolean(false);
             this.menu.addComponent(new SimpleButtonComponent(
                     pos,
                     1,
                     1,
-                    entry.getValue().get(),
-                    h -> {
-                        newChoice(entry.getKey());
-                        this.callback.accept(h, entry.getKey());
-                        reopenOriginal(h);
+                    item,
+                    (h, b) -> {
+                        boolean isChosen = !selected.get();
+                        if (isChosen) {
+                            if (choiceLimit == 1) chosen.clear();
+                            if (chosen.size() + 1 > choiceLimit)
+                                return;
+                            chosen.add(entry.getKey());
+                            newChoice(entry.getKey());
+                        } else if (choiceLimit != 1) chosen.remove(entry.getKey());
+                        selected.set(isChosen);
+                        this.callback.accept(h, chosen);
+                        if (choiceLimit == 1) reopenOriginal(h);
+                        b.setItem(changeItemVisual(item.clone(), isChosen));
                     }
             ));
             i++;
         }
     }
+
+    protected abstract ItemStack changeItemVisual(ItemStack item, boolean selected);
 
     @Override
     protected void handleClick(InventoryClickEvent e) {
@@ -116,7 +136,8 @@ public abstract class MultipleChoiceComponent extends InventorySwitchingComponen
                 .moveAmount(9)
                 .forward(new ItemStack(Material.ARROW))
                 .back(new ItemStack(Material.ARROW))
-                .callback((a, b) -> {})
+                .callback((a, b) -> {
+                })
                 .hideItemIfPaginating(true)
                 .build();
     }
