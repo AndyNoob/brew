@@ -24,8 +24,12 @@ public class SimpleMultipleChoiceComponent extends MultipleChoiceComponent {
 
     private final Function<@NotNull Set<String>, ItemStack> item;
 
+    public SimpleMultipleChoiceComponent(@NotNull JavaPlugin plugin, @NotNull Vector2i position, Function<@NotNull String, ItemStack> item, BiConsumer<HumanEntity, Set<String>> callback, LinkedHashMap<String, Supplier<ItemStack>> choices, String displayName, @Nullable @Range(from = 1, to = 6) Integer additionalRows, @Range(from = 1, to = Integer.MAX_VALUE) int choiceLimit) {
+        this(plugin, position, (Set<String> s) -> item.apply(s.stream().findFirst().orElse("")), callback, choices, displayName, additionalRows, choiceLimit, null);
+    }
+
     @Builder
-    public SimpleMultipleChoiceComponent(@NotNull JavaPlugin plugin, @NotNull Vector2i position, Function<@NotNull Set<String>, ItemStack> item, BiConsumer<HumanEntity, Set<String>> callback, LinkedHashMap<String, Supplier<ItemStack>> choices, String displayName, @Nullable @Range(from = 1, to = 6) Integer additionalRows, @Range(from = 1, to = Integer.MAX_VALUE) int choiceLimit) {
+    public SimpleMultipleChoiceComponent(@NotNull JavaPlugin plugin, @NotNull Vector2i position, Function<@NotNull Set<String>, ItemStack> item, BiConsumer<HumanEntity, Set<String>> callback, LinkedHashMap<String, Supplier<ItemStack>> choices, String displayName, @Nullable @Range(from = 1, to = 6) Integer additionalRows, @Range(from = 1, to = Integer.MAX_VALUE) int choiceLimit, @SuppressWarnings("unused") @Nullable Object anything) {
         super(plugin, position, callback, choices, displayName, additionalRows, choiceLimit);
         this.item = item;
         getItemTable().set(0, 0, item.apply(new HashSet<>()));
