@@ -22,13 +22,13 @@ import java.util.function.Supplier;
  */
 public class SimpleMultipleChoiceComponent extends MultipleChoiceComponent {
 
-    private final Function<@NotNull String, ItemStack> item;
+    private final Function<@NotNull Set<String>, ItemStack> item;
 
     @Builder
-    public SimpleMultipleChoiceComponent(@NotNull JavaPlugin plugin, @NotNull Vector2i position, Function<@NotNull String, ItemStack> item, BiConsumer<HumanEntity, Set<String>> callback, LinkedHashMap<String, Supplier<ItemStack>> choices, String displayName, @Nullable @Range(from = 1, to = 6) Integer additionalRows, @Range(from = 1, to = Integer.MAX_VALUE) int choiceLimit) {
+    public SimpleMultipleChoiceComponent(@NotNull JavaPlugin plugin, @NotNull Vector2i position, Function<@NotNull Set<String>, ItemStack> item, BiConsumer<HumanEntity, Set<String>> callback, LinkedHashMap<String, Supplier<ItemStack>> choices, String displayName, @Nullable @Range(from = 1, to = 6) Integer additionalRows, @Range(from = 1, to = Integer.MAX_VALUE) int choiceLimit) {
         super(plugin, position, callback, choices, displayName, additionalRows, choiceLimit);
         this.item = item;
-        getItemTable().set(0, 0, item.apply(""));
+        getItemTable().set(0, 0, item.apply(new HashSet<>()));
         getCollisionTable().set(0, 0);
         getActions().put((h, r) -> {
             open(h);
@@ -54,7 +54,7 @@ public class SimpleMultipleChoiceComponent extends MultipleChoiceComponent {
 
     @Override
     protected void newChoice(String choice) {
-        getItemTable().set(0, 0, this.item.apply(choice));
+        getItemTable().set(0, 0, this.item.apply(chosen));
     }
 
     @Override
