@@ -57,7 +57,7 @@ public class SimpleMultipleChoiceComponent extends MultipleChoiceComponent {
     }
 
     @Override
-    protected void newChoice(String choice) {
+    protected void newChoice(String choice, boolean removed) {
         getItemTable().set(0, 0, this.item.apply(chosen));
     }
 

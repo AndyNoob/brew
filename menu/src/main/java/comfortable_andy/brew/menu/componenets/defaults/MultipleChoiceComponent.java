@@ -73,7 +73,7 @@ public abstract class MultipleChoiceComponent extends InventorySwitchingComponen
         renderer.render();
     }
 
-    protected void newChoice(String choice) {
+    protected void newChoice(String choice, boolean removed) {
     }
 
     protected void generateChoiceButtons() {
@@ -107,11 +107,12 @@ public abstract class MultipleChoiceComponent extends InventorySwitchingComponen
                             if (chosen.size() + 1 > choiceLimit)
                                 return;
                             chosen.add(entry.getKey());
-                            newChoice(entry.getKey());
+                            newChoice(entry.getKey(), false);
                         } else if (choiceLimit != 1) {
                             // user selects the same option
                             b.setItem(changeItemVisual(item.clone(), false));
                             chosen.remove(entry.getKey());
+                            newChoice(entry.getKey(), true);
                         }
                         selected.set(isChosen);
                         this.callback.accept(h, chosen);
