@@ -12,7 +12,7 @@ java {
 }
 
 group = 'comfortable_andy'
-version = '1.7.2'
+version = '1.8.0'
 
 apply from: rootProject.file('buildSrc/shared.gradle')
 
