@@ -46,7 +46,6 @@ public abstract class MultipleChoiceComponent extends InventorySwitchingComponen
         this.callback = callback;
         final int choiceSize = choices.size();
         this.rows = NumberConversions.ceil(choiceSize / 9f) + (additionalRows == null ? 0 : additionalRows);
-        System.out.println(rows);
         this.displayName = displayName;
         this.menu = new Menu(
                 "" + hashCode(),
