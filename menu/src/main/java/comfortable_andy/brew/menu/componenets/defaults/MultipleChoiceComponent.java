@@ -34,6 +34,7 @@ public abstract class MultipleChoiceComponent extends InventorySwitchingComponen
     protected final Menu menu;
     protected final BiConsumer<HumanEntity, Set<String>> callback;
     protected final LinkedHashMap<String, Supplier<ItemStack>> choices;
+    protected final LinkedHashMap<String, SimpleButtonComponent> choiceButtons = new LinkedHashMap<>();
     protected final String displayName;
     protected int rows;
     protected int choiceLimit;
@@ -61,6 +62,7 @@ public abstract class MultipleChoiceComponent extends InventorySwitchingComponen
                 menu.addComponent(component);
             }
         } else component = null;
+        this.rows = Math.min(54 / 9, this.rows);
         final int invSize = Math.min(54, this.rows * 9);
         this.choiceInv = Bukkit.createInventory(null, invSize);
         final Renderer renderer = this.menu.getRenderer();
@@ -80,11 +82,11 @@ public abstract class MultipleChoiceComponent extends InventorySwitchingComponen
         for (Map.Entry<String, Supplier<ItemStack>> entry : this.choices.entrySet()) {
             final int horizontalOffset = i / MAX_CHOICES_PAGE;
             final int x = i % 9 - 4 + 9 * horizontalOffset;
-            final int y = this.rows / 2 - (i % MAX_CHOICES_PAGE) / 9 - 1;
+            final int y = Renderer.getInventoryCenterRowColumn(rows).y - (i % MAX_CHOICES_PAGE) / 9;
             Vector2i pos = new Vector2i(x, y);
             ItemStack item = entry.getValue().get();
             AtomicBoolean selected = new AtomicBoolean(false);
-            this.menu.addComponent(new SimpleButtonComponent(
+            SimpleButtonComponent component = new SimpleButtonComponent(
                     pos,
                     1,
                     1,
@@ -92,18 +94,33 @@ public abstract class MultipleChoiceComponent extends InventorySwitchingComponen
                     (h, b) -> {
                         boolean isChosen = !selected.get();
                         if (isChosen) {
-                            if (choiceLimit == 1) chosen.clear();
+                            if (choiceLimit == 1) {
+                                for (String s : chosen) { // unfortunately this is a set
+                                    SimpleButtonComponent button = choiceButtons.get(s);
+                                    button.setItem(changeItemVisual(
+                                            button.getItemTable().get(0, 0).clone(),
+                                            false
+                                    ));
+                                }
+                                chosen.clear();
+                            }
                             if (chosen.size() + 1 > choiceLimit)
                                 return;
                             chosen.add(entry.getKey());
                             newChoice(entry.getKey());
-                        } else if (choiceLimit != 1) chosen.remove(entry.getKey());
+                        } else if (choiceLimit != 1) {
+                            // user selects the same option
+                            b.setItem(changeItemVisual(item.clone(), false));
+                            chosen.remove(entry.getKey());
+                        }
                         selected.set(isChosen);
                         this.callback.accept(h, chosen);
                         if (choiceLimit == 1) reopenOriginal(h);
                         b.setItem(changeItemVisual(item.clone(), isChosen));
                     }
-            ));
+            );
+            this.choiceButtons.put(entry.getKey(), component);
+            this.menu.addComponent(component);
             i++;
         }
     }

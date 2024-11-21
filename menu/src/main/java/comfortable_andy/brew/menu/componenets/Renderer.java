@@ -222,7 +222,7 @@ public class Renderer {
     }
 
     @NotNull
-    private static Vector2i getInventoryCenterRowColumn(int height) {
+    public static Vector2i getInventoryCenterRowColumn(int height) {
         return new Vector2i(9 / 2, height / 2);
     }
 
